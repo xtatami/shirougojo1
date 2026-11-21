@@ -1,0 +1,4151 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Satoru Gojo - Unlimited Void Player</title>
+    <style>
+        /* ==========================================
+           1. RESET & BASE STYLES
+           ========================================== */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+            user-select: none;
+            -webkit-user-select: none;
+        }
+
+        body, html {
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            background-color: #030611;
+            font-family: 'Segoe UI', -apple-system, BlinkMacSystemFont, Roboto, sans-serif;
+            color: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        /* ==========================================
+           2. VIEWPORT CONTAINER & ZOOM-LOCKED 16:9 STAGE
+           ========================================== */
+        .stage-container {
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at center, #0a1128 0%, #02040a 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .scene-stage {
+            position: relative;
+            width: 1280px;
+            height: 720px;
+            flex-shrink: 0;
+            overflow: hidden;
+            perspective: 1200px;
+            transform-style: preserve-3d;
+            transform-origin: center center;
+            box-shadow: 0 0 60px rgba(0, 170, 255, 0.25), 0 0 120px rgba(0, 0, 0, 0.9);
+            border-radius: 8px;
+            background: #060b19;
+        }
+
+        /* Space Glitch Effect */
+        .scene-stage.space-glitch-active {
+            animation: spaceStageJitter 0.24s steps(2, end) infinite;
+        }
+        .scene-stage.space-glitch-active > *:not(.space-glitch-overlay) {
+            animation: spaceChromaticPulse 0.9s infinite;
+        }
+        .space-glitch-overlay {
+            display: none;
+            position: absolute;
+            inset: 0;
+            z-index: 95;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .scene-stage.space-glitch-active .space-glitch-overlay {
+            display: block;
+        }
+        .space-glitch-overlay::before,
+        .space-glitch-overlay::after {
+            content: '';
+            position: absolute;
+            left: 0;
+            right: 0;
+            pointer-events: none;
+        }
+        .space-glitch-overlay::before {
+            top: 0;
+            height: 26%;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 0, 85, 0.22) 0%,
+                rgba(0, 240, 255, 0.14) 50%,
+                rgba(255, 0, 85, 0.24) 100%
+            );
+            mix-blend-mode: screen;
+            animation: glitchSliceTop 1.35s steps(2, end) infinite;
+        }
+        .space-glitch-overlay::after {
+            bottom: 0;
+            height: 22%;
+            background: linear-gradient(
+                90deg,
+                rgba(0, 229, 255, 0.22) 0%,
+                rgba(255, 30, 66, 0.16) 50%,
+                rgba(0, 229, 255, 0.22) 100%
+            );
+            mix-blend-mode: screen;
+            animation: glitchSliceBottom 1.1s steps(2, end) infinite;
+        }
+        .glitch-scan-band {
+            position: absolute;
+            left: -2%;
+            right: -2%;
+            height: 7px;
+            background: rgba(56, 189, 248, 0.55);
+            box-shadow: 0 0 12px rgba(0, 170, 255, 0.8), 0 -4px 0 rgba(255, 30, 66, 0.45), 0 4px 0 rgba(0, 255, 170, 0.35);
+            animation: glitchScanSweep 2.1s linear infinite;
+        }
+
+        @keyframes spaceStageJitter {
+            0%   { translate: 0 0; }
+            25%  { translate: -3px 1px; }
+            50%  { translate: 3px -1px; }
+            75%  { translate: -2px -2px; }
+            100% { translate: 2px 2px; }
+        }
+        @keyframes spaceChromaticPulse {
+            0%, 82%, 100% {
+                filter: none;
+            }
+            84% {
+                filter: drop-shadow(-3px 0 0 rgba(255, 0, 85, 0.72)) drop-shadow(3px 0 0 rgba(0, 238, 255, 0.72));
+            }
+            88% {
+                filter: drop-shadow(4px 0 0 rgba(255, 30, 66, 0.8)) drop-shadow(-4px 0 0 rgba(0, 229, 255, 0.8)) hue-rotate(14deg);
+            }
+            92% {
+                filter: drop-shadow(-2px 1px 0 rgba(0, 255, 170, 0.65)) drop-shadow(2px -1px 0 rgba(255, 0, 128, 0.65));
+            }
+        }
+        @keyframes glitchSliceTop {
+            0%, 65%, 100% {
+                transform: translate3d(0, 0, 0);
+                opacity: 0.25;
+            }
+            68% {
+                transform: translate3d(-16px, 24px, 0) skewX(-8deg);
+                opacity: 0.9;
+            }
+            74% {
+                transform: translate3d(18px, 12px, 0) skewX(6deg);
+                opacity: 0.75;
+            }
+            80% {
+                transform: translate3d(-8px, 4px, 0);
+                opacity: 0.35;
+            }
+        }
+        @keyframes glitchSliceBottom {
+            0%, 58%, 100% {
+                transform: translate3d(0, 0, 0);
+                opacity: 0.25;
+            }
+            61% {
+                transform: translate3d(20px, -28px, 0) skewX(7deg);
+                opacity: 0.88;
+            }
+            67% {
+                transform: translate3d(-18px, -14px, 0) skewX(-6deg);
+                opacity: 0.7;
+            }
+            73% {
+                transform: translate3d(7px, -4px, 0);
+                opacity: 0.3;
+            }
+        }
+        @keyframes glitchScanSweep {
+            0%   { top: -5%; opacity: 0.2; transform: translateX(0); }
+            15%  { opacity: 0.85; transform: translateX(-12px); }
+            50%  { top: 52%; opacity: 0.65; transform: translateX(14px); }
+            85%  { opacity: 0.9; transform: translateX(-10px); }
+            100% { top: 105%; opacity: 0.2; transform: translateX(0); }
+        }
+
+        /* Pixel Art Mode Filter */
+        .scene-stage.pixel-art-active {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+            filter: contrast(1.16) saturate(1.25);
+        }
+        .scene-stage.pixel-art-active img,
+        .scene-stage.pixel-art-active canvas,
+        .scene-stage.pixel-art-active svg {
+            image-rendering: pixelated;
+            image-rendering: crisp-edges;
+        }
+        .scene-stage.pixel-art-active::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            z-index: 90;
+            pointer-events: none;
+            background-image:
+                linear-gradient(to right, rgba(0, 0, 0, 0.22) 1px, transparent 1px),
+                linear-gradient(to bottom, rgba(0, 0, 0, 0.22) 1px, transparent 1px);
+            background-size: 4px 4px;
+            mix-blend-mode: multiply;
+        }
+        .right-menu button.active-mode {
+            background: #00aaff;
+            color: #030611;
+            box-shadow: 0 0 18px #00aaff;
+        }
+
+        /* ==========================================
+           3. BACKGROUND LAYER & FALLBACK
+           ========================================== */
+        .bg-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 1;
+            transition: opacity 0.5s ease;
+            pointer-events: none;
+        }
+
+        .ref-layer {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 5;
+            mix-blend-mode: screen;
+            opacity: 0.45;
+            pointer-events: none;
+            transition: opacity 0.25s ease;
+        }
+        .ref-layer.hidden {
+            opacity: 0;
+        }
+
+        .bg-fallback-svg {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .bg-status-tag {
+            position: absolute;
+            bottom: 12px;
+            left: 12px;
+            z-index: 100;
+            font-size: 11px;
+            background: rgba(0, 10, 25, 0.75);
+            border: 1px solid rgba(0, 170, 255, 0.3);
+            padding: 4px 10px;
+            border-radius: 12px;
+            color: #7dd3fc;
+            pointer-events: none;
+            backdrop-filter: blur(6px);
+        }
+
+        /* ==========================================
+           4. COMMON GLASSMORPHISM WIDGET STYLES
+           ========================================== */
+        .widget {
+            position: absolute;
+            z-index: 10;
+            transform-style: preserve-3d;
+            backface-visibility: hidden;
+            transition: box-shadow 0.3s ease, border-color 0.3s ease;
+        }
+
+        .widget-selected {
+            outline: 2px dashed #00aaff !important;
+            outline-offset: 4px;
+        }
+
+        /* Void Red Theme Mode */
+        body.void-red-active .scene-stage {
+            box-shadow: 0 0 70px rgba(255, 30, 66, 0.45), 0 0 130px rgba(120, 0, 20, 0.75);
+            background: radial-gradient(circle at center, #26040c 0%, #090104 100%);
+        }
+        body.void-red-active .bg-layer {
+            filter: hue-rotate(155deg) saturate(1.75) brightness(1.08) drop-shadow(0 0 24px rgba(255, 30, 66, 0.4));
+        }
+        body.void-red-active .ref-layer {
+            filter: hue-rotate(155deg) saturate(1.8) brightness(1.15);
+        }
+        body.void-red-active .bg-fallback-svg {
+            filter: hue-rotate(155deg) saturate(1.7) brightness(1.1);
+        }
+        body.void-red-active .cup-widget {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+        body.void-red-active .cup-logo-img {
+            filter: drop-shadow(0 0 6px #ff1e42) drop-shadow(0 0 14px rgba(255, 30, 66, 0.85));
+        }
+        body.void-red-active .cup-widget .steam {
+            background: rgba(255, 130, 150, 0.75);
+        }
+        body.void-red-active .chibi-sprite-img {
+            filter: hue-rotate(155deg) saturate(1.65) brightness(1.1) drop-shadow(0 8px 20px rgba(255, 30, 66, 0.75));
+        }
+        .chibi-sprite-img.variant-blue {
+            filter: hue-rotate(195deg) saturate(1.85) brightness(1.08) drop-shadow(0 8px 20px rgba(0, 170, 255, 0.85));
+        }
+        .chibi-sprite-img.variant-red {
+            filter: hue-rotate(145deg) saturate(1.9) brightness(1.06) drop-shadow(0 8px 20px rgba(255, 30, 66, 0.88));
+        }
+        body.void-red-active .chibi-sprite-img.variant-blue {
+            filter: hue-rotate(195deg) saturate(1.85) brightness(1.08) drop-shadow(0 8px 20px rgba(0, 170, 255, 0.85));
+        }
+        body.void-red-active .chibi-sprite-img.variant-red {
+            filter: hue-rotate(145deg) saturate(1.9) brightness(1.06) drop-shadow(0 8px 20px rgba(255, 30, 66, 0.88));
+        }
+        body.void-red-active .chibi-quote {
+            background: rgba(38, 4, 12, 0.85);
+            border-color: rgba(255, 46, 85, 0.55);
+            color: #ffe4e8;
+        }
+        body.void-red-active .glass-panel {
+            border-color: rgba(255, 46, 85, 0.5);
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.7),
+                inset 0 0 15px rgba(255, 30, 66, 0.2),
+                0 0 22px rgba(255, 30, 66, 0.35);
+        }
+        body.void-red-active .gojo-badge {
+            background: linear-gradient(135deg, #ff1e42, #7a0019);
+            box-shadow: 0 0 14px rgba(255, 30, 66, 0.8);
+        }
+        body.void-red-active .track-info p {
+            color: #ff6b81;
+        }
+        body.void-red-active .vis-bar {
+            background: linear-gradient(to top, #7a0019, #ff1e42, #ffe4e8);
+            box-shadow: 0 0 10px rgba(255, 30, 66, 0.65);
+        }
+        body.void-red-active .vis-bar.active-glow {
+            box-shadow: 0 0 14px #ff1e42, 0 -2px 8px #ffe4e8;
+        }
+        body.void-red-active .progress-fill {
+            background: linear-gradient(90deg, #ff1e42, #ff6b81);
+            box-shadow: 0 0 10px #ff1e42;
+        }
+        body.void-red-active .btn-play {
+            background: linear-gradient(135deg, #ff1e42, #99001e);
+            box-shadow: 0 0 18px rgba(255, 30, 66, 0.75);
+        }
+        body.void-red-active .phone-widget,
+        body.custom-accent-active .phone-widget {
+            background: transparent;
+            border: none;
+            box-shadow: none;
+        }
+        body.void-red-active .phone-image-photo {
+            filter: hue-rotate(155deg) saturate(1.7) brightness(1.08) drop-shadow(0 0 14px rgba(255, 30, 66, 0.75));
+        }
+        @keyframes pulseGlowRed {
+            0% { transform: scale(0.92); opacity: 0.75; box-shadow: 0 0 12px #ff1e42; }
+            100% { transform: scale(1.08); opacity: 1; box-shadow: 0 0 28px #ff1e42, 0 0 45px #ff6b81; }
+        }
+        body.void-red-active .right-menu {
+            border-color: rgba(255, 107, 129, 0.5);
+            box-shadow: 0 0 22px rgba(255, 30, 66, 0.4), inset 0 0 12px rgba(255, 30, 66, 0.2);
+        }
+        body.void-red-active .right-menu button {
+            background: rgba(255, 30, 66, 0.14);
+            border-color: rgba(255, 107, 129, 0.45);
+        }
+        body.void-red-active .right-menu button:hover,
+        body.void-red-active .right-menu button.active-mode {
+            background: #ff1e42;
+            color: #ffffff;
+            box-shadow: 0 0 18px #ff1e42;
+        }
+
+        /* Dynamic Accent Theme Overrides for Gojo Stage & 3D iPhone */
+        body.custom-accent-active .scene-stage {
+            box-shadow: 0 0 70px color-mix(in srgb, var(--accent-primary) 48%, transparent), 0 0 125px rgba(0, 0, 0, 0.9);
+            background: radial-gradient(circle at center, color-mix(in srgb, var(--accent-secondary) 26%, #050814) 0%, #02040a 100%);
+        }
+        body.custom-accent-active .bg-layer,
+        body.custom-accent-active .ref-layer,
+        body.custom-accent-active .bg-fallback-svg,
+        body.custom-accent-active .chibi-sprite-img,
+        body.custom-accent-active .phone-image-photo {
+            filter: hue-rotate(var(--accent-hue, 0deg)) saturate(1.45) brightness(1.06) drop-shadow(0 0 16px color-mix(in srgb, var(--accent-primary) 65%, transparent));
+        }
+        body.custom-accent-active .cup-logo-img {
+            filter: drop-shadow(0 0 7px var(--accent-primary)) drop-shadow(0 0 15px color-mix(in srgb, var(--accent-primary) 85%, transparent));
+        }
+        body.custom-accent-active .glass-panel {
+            border-color: color-mix(in srgb, var(--accent-primary) 55%, transparent);
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.72),
+                inset 0 0 15px color-mix(in srgb, var(--accent-primary) 20%, transparent),
+                0 0 22px color-mix(in srgb, var(--accent-primary) 35%, transparent);
+        }
+        body.custom-accent-active .gojo-badge {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            box-shadow: 0 0 14px color-mix(in srgb, var(--accent-primary) 80%, transparent);
+        }
+        body.custom-accent-active .track-info p {
+            color: var(--accent-soft);
+        }
+        body.custom-accent-active .vis-bar {
+            background: linear-gradient(to top, var(--accent-secondary), var(--accent-primary), #ffffff);
+            box-shadow: 0 0 10px color-mix(in srgb, var(--accent-primary) 70%, transparent);
+        }
+        body.custom-accent-active .vis-bar.active-glow {
+            box-shadow: 0 0 14px var(--accent-primary), 0 -2px 8px #ffffff;
+        }
+        body.custom-accent-active .progress-fill {
+            background: linear-gradient(90deg, var(--accent-primary), var(--accent-soft));
+            box-shadow: 0 0 10px var(--accent-primary);
+        }
+        body.custom-accent-active .btn-play {
+            background: linear-gradient(135deg, var(--accent-primary), var(--accent-secondary));
+            box-shadow: 0 0 18px color-mix(in srgb, var(--accent-primary) 80%, transparent);
+        }
+        body.custom-accent-active .right-menu {
+            border-color: color-mix(in srgb, var(--accent-soft) 52%, transparent);
+            box-shadow: 0 0 22px color-mix(in srgb, var(--accent-primary) 42%, transparent), inset 0 0 12px color-mix(in srgb, var(--accent-primary) 20%, transparent);
+        }
+        body.custom-accent-active .right-menu button {
+            background: color-mix(in srgb, var(--accent-primary) 15%, transparent);
+            border-color: color-mix(in srgb, var(--accent-soft) 45%, transparent);
+        }
+        body.custom-accent-active .right-menu button:hover,
+        body.custom-accent-active .right-menu button.active-mode {
+            background: var(--accent-primary);
+            color: #030611;
+            box-shadow: 0 0 18px var(--accent-primary);
+        }
+        body.custom-accent-active .iphone-3d-modal-overlay {
+            --ios-blue: var(--accent-primary);
+            background: radial-gradient(circle at 50% 35%, color-mix(in srgb, var(--accent-secondary) 36%, #0b1326) 0%, #020617 100%);
+        }
+        body.custom-accent-active .iphone-3d-modal-overlay .iphone-app-dock {
+            background: color-mix(in srgb, var(--accent-primary) 22%, rgba(255, 255, 255, 0.25));
+            box-shadow: 0 4px 24px color-mix(in srgb, var(--accent-primary) 35%, rgba(0, 0, 0, 0.35));
+        }
+
+        .glass-panel {
+            background: rgba(8, 16, 36, 0.68);
+            backdrop-filter: blur(16px);
+            -webkit-backdrop-filter: blur(16px);
+            border: 1px solid rgba(0, 170, 255, 0.4);
+            box-shadow:
+                0 15px 35px rgba(0, 0, 0, 0.65),
+                inset 0 0 15px rgba(0, 170, 255, 0.15),
+                0 0 20px rgba(0, 170, 255, 0.25);
+            border-radius: 18px;
+        }
+
+        /* ==========================================
+           5. MUSIC PLAYER WIDGET (.music-player)
+           ========================================== */
+        .music-player {
+            width: 310px;
+            padding: 14px;
+            color: #ffffff;
+            transform-origin: top left;
+        }
+
+        .player-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 10px;
+        }
+
+        .player-title-box {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .gojo-badge {
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #00aaff, #7000ff);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            font-size: 14px;
+            box-shadow: 0 0 12px rgba(0, 170, 255, 0.7);
+        }
+
+        .track-info h3 {
+            font-size: 13px;
+            font-weight: 700;
+            color: #e0f2fe;
+            letter-spacing: 0.3px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+        .track-info p {
+            font-size: 11px;
+            color: #38bdf8;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            max-width: 180px;
+        }
+
+        .visualizer-container {
+            display: flex;
+            align-items: flex-end;
+            justify-content: space-between;
+            height: 32px;
+            gap: 3px;
+            margin: 8px 0;
+            padding: 4px 8px;
+            background: rgba(0, 5, 16, 0.45);
+            border-radius: 10px;
+            border: 1px solid rgba(0, 170, 255, 0.25);
+            box-shadow: inset 0 0 10px rgba(0, 170, 255, 0.1);
+        }
+
+        .vis-bar {
+            flex: 1;
+            background: linear-gradient(to top, #0044cc, #00aaff, #e0f2fe);
+            border-radius: 3px 3px 1px 1px;
+            height: 12%;
+            min-height: 4px;
+            transition: height 0.08s ease, background 0.2s ease, box-shadow 0.08s ease;
+            box-shadow: 0 0 8px rgba(0, 170, 255, 0.5);
+        }
+
+        .vis-bar.active-glow {
+            box-shadow: 0 0 12px #00aaff, 0 -2px 6px #e0f2fe;
+        }
+
+        .progress-box {
+            margin-bottom: 8px;
+        }
+        .time-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 10px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+        .progress-bar-bg {
+            width: 100%;
+            height: 5px;
+            background: rgba(255, 255, 255, 0.12);
+            border-radius: 3px;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: linear-gradient(90deg, #00aaff, #38bdf8);
+            border-radius: 3px;
+            box-shadow: 0 0 8px #00aaff;
+            transition: width 0.1s linear;
+        }
+
+        .player-controls {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .btn-ctrl {
+            background: transparent;
+            border: none;
+            color: #94a3b8;
+            cursor: pointer;
+            font-size: 14px;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+        }
+        .btn-ctrl:hover {
+            color: #00aaff;
+            background: rgba(0, 170, 255, 0.15);
+        }
+
+        .btn-play {
+            width: 38px;
+            height: 38px;
+            background: linear-gradient(135deg, #00aaff, #0055ff);
+            color: #ffffff;
+            font-size: 15px;
+            box-shadow: 0 0 16px rgba(0, 170, 255, 0.6);
+        }
+        .btn-play:hover {
+            transform: scale(1.08);
+            box-shadow: 0 0 22px rgba(0, 170, 255, 0.9);
+            background: linear-gradient(135deg, #38bdf8, #0066ff);
+        }
+
+        .volume-box {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .volume-slider {
+            width: 48px;
+            accent-color: #00aaff;
+            cursor: pointer;
+        }
+
+        .playlist-mini {
+            margin-top: 8px;
+            padding-top: 6px;
+            border-top: 1px solid rgba(0, 170, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            max-height: 68px;
+            overflow-y: auto;
+        }
+        .playlist-item {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            padding: 3px 6px;
+            border-radius: 5px;
+            background: rgba(0, 0, 0, 0.2);
+            cursor: pointer;
+            transition: background 0.2s ease;
+        }
+        .playlist-item:hover, .playlist-item.active {
+            background: rgba(0, 170, 255, 0.25);
+            color: #38bdf8;
+        }
+
+        /* ==========================================
+           6. PHONE WIDGET (.phone-widget) - BORDERLESS FLOATING GIF
+           ========================================== */
+        .phone-widget {
+            width: 150px;
+            height: 315px;
+            background: transparent;
+            border: none;
+            border-radius: 0;
+            box-shadow: none;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            position: absolute;
+            overflow: visible;
+            transform-origin: center center;
+            cursor: pointer;
+        }
+        .phone-image-frame {
+            width: 100%;
+            height: 100%;
+            border-radius: 0;
+            overflow: visible;
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+        }
+        .phone-image-photo {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+            display: block;
+            transition: transform 0.25s ease, filter 0.3s ease;
+        }
+        .phone-widget:hover .phone-image-photo {
+            transform: scale(1.04);
+        }
+
+        /* ==========================================
+           7. SECONDARY AMBIENT WIDGETS
+           ========================================== */
+        .cup-widget {
+            width: 72px;
+            height: 72px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: transparent;
+            border-radius: 0;
+            border: none;
+            box-shadow: none;
+            cursor: pointer;
+        }
+        .cup-logo-img {
+            width: 54px;
+            height: 54px;
+            object-fit: contain;
+            border-radius: 0;
+            filter: drop-shadow(0 0 6px #38bdf8) drop-shadow(0 0 14px rgba(0, 170, 255, 0.85));
+            transition: transform 0.2s ease, filter 0.25s ease;
+        }
+        .cup-widget:hover .cup-logo-img {
+            transform: scale(1.08);
+            filter: drop-shadow(0 0 8px #7dd3fc) drop-shadow(0 0 18px rgba(0, 170, 255, 1));
+        }
+        body.void-red-active .cup-widget:hover .cup-logo-img {
+            filter: drop-shadow(0 0 8px #ff6b81) drop-shadow(0 0 18px rgba(255, 30, 66, 1));
+        }
+        .steam-container {
+            position: absolute;
+            top: -15px;
+            display: flex;
+            gap: 4px;
+            pointer-events: none;
+        }
+        .steam {
+            width: 3px;
+            height: 16px;
+            background: rgba(224, 242, 254, 0.6);
+            border-radius: 2px;
+            animation: steamRise 2s infinite ease-in-out;
+        }
+        .steam:nth-child(2) { animation-delay: 0.5s; }
+        .steam:nth-child(3) { animation-delay: 1s; }
+
+        @keyframes steamRise {
+            0% { transform: translateY(0) scaleX(1); opacity: 0.8; }
+            50% { transform: translateY(-10px) scaleX(1.5); opacity: 0.4; }
+            100% { transform: translateY(-20px) scaleX(2); opacity: 0; }
+        }
+
+        /* Clean Fullscreen 3D Cup Overlay */
+        .cup-3d-overlay {
+            position: absolute;
+            inset: 0;
+            z-index: 350;
+            background: transparent;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            cursor: grab;
+        }
+        .cup-3d-overlay.active {
+            display: flex;
+        }
+        .cup-3d-overlay.dragging {
+            cursor: grabbing;
+        }
+        .cup-3d-canvas-wrap {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            background: transparent;
+            overflow: hidden;
+            pointer-events: none;
+        }
+        .cup-3d-close {
+            position: absolute;
+            top: 22px;
+            right: 26px;
+            z-index: 10;
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            background: rgba(4, 16, 38, 0.72);
+            border: 1px solid rgba(125, 211, 252, 0.45);
+            color: #e0f2fe;
+            font-size: 16px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+            pointer-events: auto;
+        }
+        .cup-3d-close:hover {
+            background: #00aaff;
+            color: #020617;
+            box-shadow: 0 0 14px #00aaff;
+        }
+
+        /* Fullscreen iPhone 3D Interactive Modal Overlay */
+        .iphone-3d-modal-overlay {
+            --phone-w: 300px;
+            --phone-h: 600px;
+            --phone-depth: 16px;
+            --ios-blue: #007aff;
+            --ios-gray-bg: #f2f2f7;
+            position: absolute;
+            inset: 0;
+            z-index: 360;
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            background: radial-gradient(circle at 50% 35%, rgba(15, 28, 58, 0.88) 0%, rgba(2, 6, 17, 0.94) 100%);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            color: #fff;
+        }
+        .iphone-3d-modal-overlay.is-visible {
+            display: flex;
+        }
+        .iphone-modal-close {
+            position: absolute;
+            top: 22px;
+            right: 26px;
+            z-index: 380;
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            background: rgba(15, 23, 42, 0.8);
+            border: 1px solid rgba(125, 211, 252, 0.45);
+            color: #f8fafc;
+            font-size: 17px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.2s ease;
+        }
+        .iphone-modal-close:hover {
+            background: #38bdf8;
+            color: #020617;
+            box-shadow: 0 0 14px #38bdf8;
+        }
+        .iphone-3d-modal-overlay .scene-3d {
+            perspective: 1200px;
+            width: 100%;
+            max-width: 450px;
+            height: 615px;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+            cursor: grab;
+            touch-action: none;
+        }
+        .iphone-3d-modal-overlay .scene-3d:active {
+            cursor: grabbing;
+        }
+        .iphone-3d-modal-overlay .phone-3d-object {
+            width: var(--phone-w);
+            height: var(--phone-h);
+            position: relative;
+            transform-style: preserve-3d;
+            transform: rotateX(0deg) rotateY(0deg);
+            transition: transform 0.1s ease-out;
+        }
+        .iphone-3d-modal-overlay .phone-face-front {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            border-radius: 44px;
+            box-shadow: inset 0 0 0 3px #27272a, inset 0 0 0 5px #09090b;
+            transform: translateZ(calc(var(--phone-depth) / 2));
+            backface-visibility: hidden;
+            overflow: hidden;
+            z-index: 2;
+        }
+        .iphone-3d-modal-overlay .phone-notch {
+            position: absolute;
+            top: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 95px;
+            height: 25px;
+            background-color: #000;
+            border-radius: 20px;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 10px;
+            pointer-events: none;
+        }
+        .iphone-3d-modal-overlay .notch-camera {
+            width: 10px;
+            height: 10px;
+            background-color: #0d0d18;
+            border-radius: 50%;
+            box-shadow: inset 0 0 2px rgba(255, 255, 255, 0.3);
+        }
+        .iphone-3d-modal-overlay .notch-sensor {
+            width: 10px;
+            height: 10px;
+            background-color: #111;
+            border-radius: 50%;
+        }
+        .iphone-3d-modal-overlay .phone-screen {
+            width: 100%;
+            height: 100%;
+            background-color: #000;
+            position: relative;
+            overflow: hidden;
+        }
+        .iphone-3d-modal-overlay .phone-screen-background {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            z-index: 0;
+            transition: opacity 0.5s ease, transform 0.5s ease;
+        }
+        .iphone-3d-modal-overlay .phone-screen-background.lock {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .iphone-3d-modal-overlay .phone-screen-background.home {
+            opacity: 0;
+            transform: scale(1.05);
+        }
+        .iphone-3d-modal-overlay .phone-overlay {
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.35) 0%, rgba(0, 0, 0, 0.05) 40%, rgba(0, 0, 0, 0.4) 100%);
+            z-index: 1;
+            pointer-events: none;
+            transition: background 0.4s ease;
+        }
+        .iphone-3d-modal-overlay .phone-status {
+            position: absolute;
+            top: 13px;
+            left: 20px;
+            right: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            color: #fff;
+            font-size: 11px;
+            font-weight: 600;
+            z-index: 90;
+            pointer-events: none;
+            transition: color 0.3s ease;
+        }
+        .iphone-3d-modal-overlay .phone-status.dark-text {
+            color: #000;
+        }
+        .iphone-3d-modal-overlay .status-right {
+            display: flex;
+            align-items: center;
+            gap: 5px;
+        }
+        .iphone-3d-modal-overlay .phone-time-container {
+            position: absolute;
+            top: 18%;
+            left: 0;
+            right: 0;
+            text-align: center;
+            z-index: 10;
+            transition: opacity 0.4s ease, transform 0.4s ease;
+            pointer-events: none;
+        }
+        .iphone-3d-modal-overlay .phone-time {
+            font-size: 68px;
+            font-weight: 200;
+            color: #ffffff;
+            text-shadow: 0 2px 15px rgba(0, 0, 0, 0.3);
+            margin: 0;
+            line-height: 1;
+            letter-spacing: -1px;
+        }
+        .iphone-3d-modal-overlay .phone-date {
+            font-size: 15px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.9);
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+            margin: 8px 0 0;
+        }
+        .iphone-3d-modal-overlay .phone-xatspace {
+            font-size: 13px;
+            font-weight: 500;
+            color: rgba(255, 255, 255, 0.85);
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.5);
+            margin: 6px 0 0;
+            letter-spacing: 0.5px;
+        }
+        .iphone-3d-modal-overlay .iphone-user-avatar {
+            position: absolute;
+            width: 74px;
+            height: 74px;
+            bottom: 45px;
+            left: 50%;
+            transform: translateX(-50%);
+            cursor: pointer;
+            z-index: 20;
+            border: none;
+            background: transparent;
+            padding: 0;
+            animation: floatAvatar 3.5s ease-in-out infinite;
+            transition: opacity 0.3s ease, transform 0.2s ease;
+        }
+        .iphone-3d-modal-overlay .iphone-user-avatar:active {
+            transform: translateX(-50%) scale(0.92);
+        }
+        .iphone-3d-modal-overlay .iphone-avatar-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            border-radius: 50%;
+            overflow: hidden;
+            background: rgba(255, 255, 255, 0.2);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 2px solid rgba(255, 255, 255, 0.75);
+            box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+        }
+        .iphone-3d-modal-overlay .iphone-avatar-img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .iphone-3d-modal-overlay .unlock-hint {
+            position: absolute;
+            bottom: -22px;
+            left: 50%;
+            transform: translateX(-50%);
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.85);
+            white-space: nowrap;
+            text-shadow: 0 1px 4px rgba(0, 0, 0, 0.6);
+            font-weight: 500;
+        }
+        @keyframes floatAvatar {
+            0%, 100% { transform: translateX(-50%) translateY(0); }
+            50% { transform: translateX(-50%) translateY(-6px); }
+        }
+        .iphone-3d-modal-overlay .iphone-app-dock {
+            position: absolute;
+            bottom: 46px;
+            left: 14px;
+            right: 14px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background: rgba(255, 255, 255, 0.35);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            padding: 10px 14px;
+            border-radius: 26px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.25);
+            z-index: 25;
+            opacity: 0;
+            pointer-events: none;
+            transform: translateY(30px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+        .iphone-3d-modal-overlay .iphone-app-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            transition: transform 0.2s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.2);
+        }
+        .iphone-3d-modal-overlay .iphone-app-icon:active {
+            transform: scale(0.85);
+        }
+        .iphone-3d-modal-overlay .iphone-app-icon__messages {
+            background: linear-gradient(180deg, #62e57b 0%, #34c759 100%);
+        }
+        .iphone-3d-modal-overlay .iphone-app-icon__instagram {
+            background: radial-gradient(circle at 30% 107%, #fdf497 0%, #fdf497 5%, #fd5949 45%, #d6249f 60%, #285AEB 90%);
+        }
+        .iphone-3d-modal-overlay .iphone-app-icon__themes {
+            background: linear-gradient(135deg, #38bdf8 0%, #a855f7 55%, #ff1e42 100%);
+        }
+        .iphone-3d-modal-overlay .iphone-app-icon__music {
+            background: linear-gradient(180deg, #ff6b81 0%, #ff2d55 100%);
+        }
+        .iphone-3d-modal-overlay .iphone-app-icon svg {
+            width: 58%;
+            height: 58%;
+            fill: #ffffff;
+        }
+
+        /* Ampliar zona inferior para cerrar aplicaciones */
+        .iphone-3d-modal-overlay .iphone-home-indicator {
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 240px;
+            height: 48px;
+            background-color: transparent;
+            border-radius: 16px;
+            z-index: 95;
+            cursor: pointer;
+            border: none;
+            padding: 16px 24px 8px;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            opacity: 0;
+            pointer-events: none;
+            touch-action: none;
+            transition: opacity 0.3s ease, background-color 0.2s ease;
+        }
+        .iphone-3d-modal-overlay .iphone-home-indicator:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+        .iphone-3d-modal-overlay .iphone-home-indicator::after {
+            content: '';
+            display: block;
+            width: 136px;
+            height: 6px;
+            border-radius: 6px;
+            background-color: #ffffff;
+            box-shadow: 0 1px 6px rgba(0, 0, 0, 0.45);
+            transition: background-color 0.3s ease, transform 0.2s ease;
+        }
+        .iphone-3d-modal-overlay .iphone-home-indicator.dark::after {
+            background-color: #000000;
+            box-shadow: 0 1px 4px rgba(255, 255, 255, 0.35);
+        }
+        .iphone-3d-modal-overlay .iphone-home-indicator:hover::after {
+            transform: scaleX(1.06);
+        }
+
+        .iphone-3d-modal-overlay .iphone-app-view {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            z-index: 30;
+            display: none;
+            flex-direction: column;
+            opacity: 0;
+            transform: scale(0.92) translateY(20px);
+            transition: opacity 0.35s cubic-bezier(0.16, 1, 0.3, 1), transform 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        .iphone-3d-modal-overlay .iphone-app-view.is-open {
+            display: flex;
+            opacity: 1;
+            transform: scale(1) translateY(0);
+        }
+        .iphone-3d-modal-overlay .iphone-messages-app {
+            background-color: var(--ios-gray-bg);
+            color: #000;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-header {
+            padding: 42px 14px 10px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background-color: rgba(242, 242, 247, 0.9);
+            backdrop-filter: blur(10px);
+            border-bottom: 1px solid rgba(0, 0, 0, 0.1);
+        }
+        .iphone-3d-modal-overlay .iphone-messages-search {
+            flex: 1;
+            background-color: #e3e3e8;
+            border-radius: 10px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            padding: 0 10px;
+            gap: 6px;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-search-icon,
+        .iphone-3d-modal-overlay .iphone-messages-search-text {
+            font-size: 13px;
+            color: #8e8e93;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-cancel {
+            font-size: 13px;
+            color: var(--ios-blue);
+            cursor: pointer;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-title-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            padding: 10px 14px 6px;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-title {
+            font-size: 24px;
+            font-weight: 700;
+            margin: 0;
+            color: #000;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-section-action {
+            font-size: 13px;
+            color: var(--ios-blue);
+            cursor: pointer;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-list {
+            flex: 1;
+            overflow-y: auto;
+            padding: 0 12px 75px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-conversation {
+            display: flex;
+            flex-direction: column;
+            position: relative;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-conversation-row {
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-contact-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            overflow: hidden;
+            flex-shrink: 0;
+            background-color: #d1d1d6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 11px;
+            font-weight: 600;
+            color: #555;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-contact-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-contact-name {
+            font-size: 11px;
+            color: #8e8e93;
+            margin-bottom: 3px;
+            margin-left: 38px;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-timestamp {
+            font-size: 11px;
+            color: #8e8e93;
+            position: absolute;
+            right: 0;
+            top: 0;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-bubble {
+            padding: 8px 12px;
+            border-radius: 16px;
+            display: inline-block;
+            max-width: 190px;
+            font-size: 13px;
+            line-height: 1.35;
+            word-wrap: break-word;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-sent {
+            background-color: var(--ios-blue);
+            color: #fff;
+            margin-left: auto;
+            border-bottom-right-radius: 4px;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-received {
+            background-color: #e5e5ea;
+            color: #000;
+            border-bottom-left-radius: 4px;
+        }
+        @keyframes msgDropIn {
+            0% { opacity: 0; transform: translateY(-14px) scale(0.95); }
+            70% { transform: translateY(2px) scale(1.02); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+        .iphone-3d-modal-overlay .iphone-messages-conversation.msg-animate {
+            animation: msgDropIn 0.45s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+        .iphone-3d-modal-overlay .iphone-messages-conversation.is-hidden {
+            display: none;
+        }
+        .iphone-3d-modal-overlay .replay-msg-btn {
+            font-size: 11px;
+            color: var(--ios-blue);
+            background: rgba(0, 122, 255, 0.12);
+            border: 1px solid rgba(0, 122, 255, 0.25);
+            border-radius: 12px;
+            padding: 3px 9px;
+            cursor: pointer;
+            font-weight: 500;
+        }
+
+        /* Themes App */
+        .iphone-3d-modal-overlay .iphone-themes-app {
+            background: linear-gradient(180deg, #0b1120 0%, #111827 100%);
+            color: #f8fafc;
+        }
+        .iphone-3d-modal-overlay .iphone-themes-header {
+            padding: 42px 14px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: rgba(15, 23, 42, 0.92);
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .iphone-3d-modal-overlay .iphone-themes-back,
+        .iphone-3d-modal-overlay .iphone-themes-done {
+            color: var(--accent-soft, #38bdf8);
+            font-size: 13px;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .iphone-3d-modal-overlay .iphone-themes-title {
+            font-size: 15px;
+            font-weight: 700;
+            color: #f8fafc;
+        }
+        .iphone-3d-modal-overlay .iphone-themes-content {
+            flex: 1;
+            padding: 12px 14px 76px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            overflow-y: auto;
+        }
+        .theme-picker-subtitle {
+            font-size: 11px;
+            color: #cbd5e1;
+            line-height: 1.35;
+        }
+        .theme-swatches-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 8px;
+        }
+        .theme-swatch-btn {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 9px;
+            border-radius: 12px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(30, 41, 59, 0.75);
+            color: #f8fafc;
+            font-size: 11px;
+            font-weight: 600;
+            cursor: pointer;
+            text-align: left;
+            transition: transform 0.16s ease, border-color 0.2s ease, background 0.2s ease;
+        }
+        .theme-swatch-btn:hover {
+            transform: translateY(-1px);
+            background: rgba(51, 65, 85, 0.88);
+        }
+        .theme-swatch-btn.is-selected {
+            border-color: var(--swatch-color, #38bdf8);
+            box-shadow: 0 0 12px color-mix(in srgb, var(--swatch-color, #38bdf8) 55%, transparent);
+            background: rgba(15, 23, 42, 0.95);
+        }
+        .theme-swatch-dot {
+            width: 18px;
+            height: 18px;
+            border-radius: 50%;
+            flex-shrink: 0;
+            background: var(--swatch-color, #38bdf8);
+            box-shadow: 0 0 10px var(--swatch-color, #38bdf8);
+            border: 2px solid rgba(255, 255, 255, 0.75);
+        }
+        .theme-active-banner {
+            margin-top: auto;
+            padding: 8px 10px;
+            border-radius: 10px;
+            background: rgba(15, 23, 42, 0.85);
+            border: 1px solid color-mix(in srgb, var(--accent-primary, #00aaff) 45%, transparent);
+            font-size: 11px;
+            color: #e2e8f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .theme-active-chip {
+            font-weight: 700;
+            color: var(--accent-soft, #38bdf8);
+        }
+
+        .iphone-3d-modal-overlay .iphone-instagram-app {
+            background-color: #000000;
+            color: #ffffff;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-header {
+            padding: 42px 14px 10px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            background-color: #000000;
+            border-bottom: 1px solid #1c1c1e;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-logo {
+            font-family: Georgia, serif;
+            font-style: italic;
+            font-size: 22px;
+            font-weight: bold;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-feed {
+            flex: 1;
+            overflow-y: auto;
+            padding-bottom: 75px;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post {
+            margin-bottom: 14px;
+            border-bottom: 1px solid #1c1c1e;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-header {
+            display: flex;
+            align-items: center;
+            padding: 8px 10px;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-avatar {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            overflow: hidden;
+            margin-right: 10px;
+            background: #333;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-avatar img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-username {
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-location {
+            font-size: 10px;
+            color: #8e8e93;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-image {
+            width: 100%;
+            aspect-ratio: 4/3;
+            background-color: #1a1a1a;
+            overflow: hidden;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-actions {
+            display: flex;
+            gap: 14px;
+            padding: 8px 10px;
+            align-items: center;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-action-btn {
+            background: none;
+            border: none;
+            color: #fff;
+            cursor: pointer;
+            padding: 0;
+            display: flex;
+            align-items: center;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-action-btn svg {
+            width: 20px;
+            height: 20px;
+            fill: none;
+            stroke: currentColor;
+            stroke-width: 2;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-action-btn.liked svg {
+            fill: #ff3b30;
+            stroke: #ff3b30;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-caption {
+            padding: 4px 10px 10px;
+            font-size: 11px;
+            color: #e2e8f0;
+            line-height: 1.35;
+        }
+        .iphone-3d-modal-overlay .iphone-instagram-post-caption .username-tag {
+            font-weight: 700;
+            margin-right: 5px;
+            color: #ffffff;
+        }
+        .iphone-3d-modal-overlay .iphone-music-app {
+            background-color: #000;
+        }
+        .iphone-3d-modal-overlay .iphone-music-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            align-items: center;
+            background: linear-gradient(180deg, #7c1d24 0%, #4a1017 40%, #120406 100%);
+            padding: 42px 18px 84px;
+            position: relative;
+        }
+        .iphone-3d-modal-overlay .iphone-music-header {
+            width: 100%;
+            text-align: left;
+            margin-top: 8px;
+        }
+        .iphone-3d-modal-overlay .iphone-music-live-tag {
+            display: inline-block;
+            background-color: rgba(255, 255, 255, 0.2);
+            color: #fff;
+            font-size: 10px;
+            font-weight: 600;
+            padding: 2px 7px;
+            border-radius: 6px;
+            margin-bottom: 4px;
+        }
+        .iphone-3d-modal-overlay .iphone-music-artist-name {
+            color: #fff;
+            font-size: 18px;
+            font-weight: 700;
+        }
+        .iphone-3d-modal-overlay .iphone-music-album-art {
+            width: 170px;
+            height: 170px;
+            margin: 8px auto;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.5);
+            overflow: hidden;
+            background-color: #2a0a0e;
+        }
+        .iphone-3d-modal-overlay .iphone-music-album-art img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+        }
+        .iphone-3d-modal-overlay .iphone-music-controls {
+            width: 100%;
+        }
+        .iphone-3d-modal-overlay .iphone-music-song-info {
+            background-color: rgba(255, 255, 255, 0.15);
+            border-radius: 14px;
+            padding: 12px 104px 12px 14px;
+            backdrop-filter: blur(15px);
+            -webkit-backdrop-filter: blur(15px);
+            position: relative;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .iphone-3d-modal-overlay .iphone-music-song-title {
+            color: #fff;
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .iphone-3d-modal-overlay .iphone-music-song-artist {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 12px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .iphone-3d-modal-overlay .iphone-music-transport {
+            position: absolute;
+            right: 8px;
+            top: 50%;
+            transform: translateY(-50%);
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        .iphone-3d-modal-overlay .music-nav-btn {
+            width: 26px;
+            height: 26px;
+            border-radius: 50%;
+            border: none;
+            background: rgba(255, 255, 255, 0.18);
+            color: #fff;
+            font-size: 11px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .iphone-3d-modal-overlay .music-toggle-btn {
+            width: 36px;
+            height: 36px;
+            background: rgba(255, 255, 255, 0.95);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            border: none;
+            padding: 0;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
+        }
+        .iphone-3d-modal-overlay .play-triangle {
+            width: 0;
+            height: 0;
+            border-style: solid;
+            border-width: 7px 0 7px 12px;
+            border-color: transparent transparent transparent #000;
+            margin-left: 3px;
+        }
+        .iphone-3d-modal-overlay .pause-bars {
+            display: none;
+            gap: 3px;
+        }
+        .iphone-3d-modal-overlay .pause-bars span {
+            display: block;
+            width: 4px;
+            height: 14px;
+            background-color: #000;
+            border-radius: 2px;
+        }
+        .iphone-3d-modal-overlay .music-toggle-btn.is-playing .play-triangle {
+            display: none;
+        }
+        .iphone-3d-modal-overlay .music-toggle-btn.is-playing .pause-bars {
+            display: flex;
+        }
+        .iphone-3d-modal-overlay .phone-screen.is-unlocked .phone-screen-background.lock {
+            opacity: 0;
+            transform: scale(0.95);
+        }
+        .iphone-3d-modal-overlay .phone-screen.is-unlocked .phone-screen-background.home {
+            opacity: 1;
+            transform: scale(1);
+        }
+        .iphone-3d-modal-overlay .phone-screen.is-unlocked .phone-overlay {
+            background: linear-gradient(180deg, rgba(0, 0, 0, 0.15) 0%, rgba(0, 0, 0, 0) 40%, rgba(0, 0, 0, 0.15) 100%);
+        }
+        .iphone-3d-modal-overlay .phone-screen.is-unlocked .phone-time-container,
+        .iphone-3d-modal-overlay .phone-screen.is-unlocked .iphone-user-avatar {
+            opacity: 0;
+            pointer-events: none;
+            transform: translateX(-50%) translateY(-20px);
+        }
+        .iphone-3d-modal-overlay .phone-screen.is-unlocked .iphone-app-dock {
+            opacity: 1;
+            pointer-events: auto;
+            transform: translateY(0);
+        }
+        .iphone-3d-modal-overlay .phone-screen.is-unlocked .iphone-home-indicator {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .iphone-3d-modal-overlay .phone-face-back {
+            position: absolute;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            background: radial-gradient(circle at 50% 30%, #3f4756 0%, #1e2530 70%, #151a22 100%);
+            border-radius: 44px;
+            box-shadow: inset 0 0 0 3px #525c6e, inset 0 0 0 5px #11151c;
+            transform: translateZ(calc(var(--phone-depth) / -2)) rotateY(180deg);
+            backface-visibility: hidden;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
+        .iphone-3d-modal-overlay .camera-bump {
+            position: absolute;
+            top: 18px;
+            left: 18px;
+            width: 115px;
+            height: 120px;
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(10px);
+            border-radius: 28px;
+            box-shadow: inset 0 0 0 1px rgba(255, 255, 255, 0.2), 2px 4px 12px rgba(0, 0, 0, 0.5);
+            transform: translateZ(4px);
+        }
+        .iphone-3d-modal-overlay .camera-lens {
+            position: absolute;
+            border-radius: 50%;
+            background: radial-gradient(circle at 35% 35%, #2a323d 0%, #090a0f 70%);
+            box-shadow: 0 0 0 3px #485363, 0 0 0 4px #1a2028, 0 3px 6px rgba(0,0,0,0.6);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .iphone-3d-modal-overlay .camera-lens::after {
+            content: '';
+            width: 45%;
+            height: 45%;
+            border-radius: 50%;
+            background: radial-gradient(circle at 30% 30%, #1e3a8a 0%, #030712 80%);
+            box-shadow: inset 0 0 2px rgba(255,255,255,0.6);
+        }
+        .iphone-3d-modal-overlay .lens-1 { width: 38px; height: 38px; top: 12px; left: 12px; }
+        .iphone-3d-modal-overlay .lens-2 { width: 38px; height: 38px; bottom: 12px; left: 12px; }
+        .iphone-3d-modal-overlay .lens-3 { width: 38px; height: 38px; top: 41px; right: 12px; }
+        .iphone-3d-modal-overlay .flash-led {
+            position: absolute;
+            top: 18px;
+            right: 20px;
+            width: 14px;
+            height: 14px;
+            border-radius: 50%;
+            background: radial-gradient(circle, #fffde7 30%, #ffd54f 80%);
+            box-shadow: 0 0 0 2px #485363, 0 0 4px rgba(255,213,79,0.8);
+        }
+        .iphone-3d-modal-overlay .lidar-sensor {
+            position: absolute;
+            bottom: 20px;
+            right: 22px;
+            width: 10px;
+            height: 10px;
+            border-radius: 50%;
+            background: #090b0e;
+            box-shadow: inset 0 0 0 1px #333;
+        }
+        .iphone-3d-modal-overlay .apple-logo {
+            width: 45px;
+            height: 55px;
+            fill: url(#iphoneMetalGradient);
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.4));
+            opacity: 0.9;
+        }
+        .iphone-3d-modal-overlay .phone-back-text {
+            position: absolute;
+            bottom: 30px;
+            font-size: 9px;
+            letter-spacing: 1px;
+            color: rgba(255, 255, 255, 0.35);
+            text-transform: uppercase;
+            font-weight: 500;
+        }
+        .iphone-3d-modal-overlay .phone-edge {
+            position: absolute;
+            background: linear-gradient(90deg, #3a424e 0%, #687487 50%, #2a3039 100%);
+        }
+        .iphone-3d-modal-overlay .phone-edge-left {
+            width: var(--phone-depth);
+            height: calc(var(--phone-h) - 70px);
+            top: 35px;
+            left: calc(var(--phone-depth) / -2);
+            transform: rotateY(-90deg);
+        }
+        .iphone-3d-modal-overlay .phone-edge-right {
+            width: var(--phone-depth);
+            height: calc(var(--phone-h) - 70px);
+            top: 35px;
+            right: calc(var(--phone-depth) / -2);
+            transform: rotateY(90deg);
+        }
+        .iphone-3d-modal-overlay .phone-edge-top {
+            width: calc(var(--phone-w) - 70px);
+            height: var(--phone-depth);
+            top: calc(var(--phone-depth) / -2);
+            left: 35px;
+            transform: rotateX(90deg);
+        }
+        .iphone-3d-modal-overlay .phone-edge-bottom {
+            width: calc(var(--phone-w) - 70px);
+            height: var(--phone-depth);
+            bottom: calc(var(--phone-depth) / -2);
+            left: 35px;
+            transform: rotateX(-90deg);
+        }
+        .iphone-3d-modal-overlay .drag-hint-badge {
+            margin-top: 8px;
+            font-size: 11px;
+            color: rgba(255, 255, 255, 0.72);
+        }
+        .chibi-widget {
+            width: 112px;
+            height: 132px;
+            background: transparent;
+            border: none;
+            box-shadow: none;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: flex-end;
+            padding: 4px 2px;
+            cursor: pointer;
+            text-align: center;
+            overflow: visible;
+        }
+
+        .chibi-stage {
+            position: relative;
+            width: 92px;
+            height: 92px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 3px;
+        }
+
+        .chibi-sprite-img {
+            width: 88px;
+            height: 88px;
+            object-fit: contain;
+            filter: drop-shadow(0 8px 14px rgba(0, 170, 255, 0.45));
+            transition: transform 0.3s cubic-bezier(0.175, 0.885, 0.32, 1.275), filter 0.3s ease;
+            animation: chibiIdleBreath 2.6s ease-in-out infinite;
+        }
+
+        .chibi-fx-badge {
+            position: absolute;
+            top: -8px;
+            right: 2px;
+            font-size: 16px;
+            pointer-events: none;
+            filter: drop-shadow(0 0 8px rgba(255, 255, 255, 0.65));
+        }
+
+        .chibi-widget.mood-happy .chibi-sprite-img {
+            animation: chibiHappyBounce 1.1s ease-in-out infinite;
+            filter: drop-shadow(0 8px 16px rgba(56, 189, 248, 0.7)) brightness(1.08);
+        }
+        .chibi-widget.mood-happy .chibi-fx-badge {
+            animation: chibiSparklePop 1.1s ease-in-out infinite;
+        }
+
+        .chibi-widget.mood-love .chibi-sprite-img {
+            animation: chibiLoveSway 1.6s ease-in-out infinite;
+            filter: drop-shadow(0 8px 18px rgba(255, 64, 129, 0.7)) saturate(1.25);
+        }
+        .chibi-widget.mood-love .chibi-fx-badge {
+            animation: chibiHeartFloat 1.5s ease-in-out infinite;
+        }
+
+        .chibi-widget.mood-angry .chibi-sprite-img {
+            animation: chibiAngryShake 0.42s ease-in-out infinite;
+            filter: drop-shadow(0 8px 18px rgba(255, 30, 66, 0.8)) contrast(1.15);
+        }
+        .chibi-widget.mood-angry .chibi-fx-badge {
+            animation: chibiAngerPulse 0.6s ease-in-out infinite;
+        }
+
+        @keyframes chibiIdleBreath {
+            0%, 100% { transform: translateY(0px) scale(1); }
+            50% { transform: translateY(-4px) scale(1.02); }
+        }
+
+        @keyframes chibiHappyBounce {
+            0%, 100% { transform: translateY(0px) scale(1.03) rotate(-2deg); }
+            50% { transform: translateY(-8px) scale(1.07) rotate(2deg); }
+        }
+
+        @keyframes chibiLoveSway {
+            0%, 100% { transform: translateY(-2px) rotate(-5deg) scale(1.04); }
+            50% { transform: translateY(-6px) rotate(5deg) scale(1.08); }
+        }
+
+        @keyframes chibiAngryShake {
+            0%, 100% { transform: translateX(0px) rotate(0deg) scale(1.04); }
+            25% { transform: translateX(-3px) rotate(-3deg) scale(1.05); }
+            75% { transform: translateX(3px) rotate(3deg) scale(1.05); }
+        }
+
+        @keyframes chibiSparklePop {
+            0%, 100% { transform: translateY(0) scale(0.95) rotate(0deg); opacity: 0.9; }
+            50% { transform: translateY(-6px) scale(1.2) rotate(15deg); opacity: 1; }
+        }
+
+        @keyframes chibiHeartFloat {
+            0% { transform: translateY(2px) scale(0.85); opacity: 0.75; }
+            50% { transform: translateY(-9px) scale(1.22); opacity: 1; }
+            100% { transform: translateY(-14px) scale(0.9); opacity: 0.8; }
+        }
+
+        @keyframes chibiAngerPulse {
+            0%, 100% { transform: scale(1); opacity: 0.85; }
+            50% { transform: scale(1.25); opacity: 1; }
+        }
+
+        @keyframes chibiClickSwapPop {
+            0% { transform: scale(0.75) rotate(-14deg); opacity: 0.35; }
+            55% { transform: scale(1.18) rotate(8deg); opacity: 1; }
+            80% { transform: scale(0.95) rotate(-4deg); }
+            100% { transform: scale(1.04) rotate(0deg); opacity: 1; }
+        }
+
+        .chibi-sprite-img.swap-anim {
+            animation: chibiClickSwapPop 0.52s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+        }
+
+        .chibi-quote {
+            font-size: 9px;
+            color: #e0f2fe;
+            background: rgba(4, 12, 28, 0.78);
+            border: 1px solid rgba(0, 170, 255, 0.35);
+            border-radius: 8px;
+            padding: 2px 6px;
+            font-weight: 600;
+            line-height: 1.2;
+            max-width: 108px;
+            text-shadow: 0 1px 6px rgba(0, 0, 0, 0.9);
+        }
+        @keyframes pulseGlow {
+            0% { transform: scale(0.92); opacity: 0.7; box-shadow: 0 0 12px #00aaff; }
+            100% { transform: scale(1.08); opacity: 1; box-shadow: 0 0 28px #00aaff, 0 0 45px #38bdf8; }
+        }
+
+        /* ==========================================
+           8. RIGHT NAVIGATION MENU (.right-menu)
+           ========================================== */
+        .right-menu {
+            left: 94.1%;
+            top: 5.1%;
+            width: 58px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 10px;
+            background: rgba(3, 10, 26, 0.72);
+            backdrop-filter: blur(14px);
+            -webkit-backdrop-filter: blur(14px);
+            border: 1px solid rgba(56, 189, 248, 0.45);
+            padding: 10px 6px;
+            border-radius: 32px;
+            box-shadow:
+                0 0 22px rgba(0, 170, 255, 0.35),
+                inset 0 0 12px rgba(0, 170, 255, 0.15);
+            z-index: 200;
+        }
+
+        .right-menu button {
+            width: 44px;
+            height: 44px;
+            border-radius: 50%;
+            background: rgba(0, 170, 255, 0.12);
+            border: 1px solid rgba(125, 211, 252, 0.45);
+            color: #e0f2fe;
+            cursor: pointer;
+            transition: all 0.22s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .right-menu button svg {
+            width: 21px;
+            height: 21px;
+            stroke: currentColor;
+            fill: none;
+            stroke-width: 2;
+            stroke-linecap: round;
+            stroke-linejoin: round;
+            filter: drop-shadow(0 0 5px rgba(56, 189, 248, 0.7));
+        }
+
+        .right-menu button:hover {
+            background: #00aaff;
+            color: #030611;
+            box-shadow: 0 0 18px #00aaff;
+            transform: scale(1.12);
+        }
+
+        .right-menu button:hover svg {
+            filter: none;
+        }
+
+        /* ==========================================
+           9. LIVE CALIBRATION PANEL
+           ========================================== */
+        .calib-panel {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            width: 320px;
+            background: rgba(4, 10, 24, 0.94);
+            backdrop-filter: blur(18px);
+            border: 1px solid rgba(0, 170, 255, 0.55);
+            border-radius: 16px;
+            padding: 18px;
+            z-index: 300;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.85), 0 0 22px rgba(0, 170, 255, 0.35);
+            display: none;
+            max-height: calc(100% - 40px);
+            overflow-y: auto;
+        }
+
+        .calib-panel.active {
+            display: block;
+        }
+
+        .calib-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 14px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid rgba(0, 170, 255, 0.25);
+        }
+
+        .calib-header h2 {
+            font-size: 14px;
+            color: #38bdf8;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+        }
+
+        .calib-group {
+            margin-bottom: 12px;
+        }
+
+        .calib-group label {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: #94a3b8;
+            margin-bottom: 4px;
+        }
+
+        .calib-group input[type="range"] {
+            width: 100%;
+            accent-color: #00aaff;
+            cursor: pointer;
+        }
+
+        .calib-select {
+            width: 100%;
+            padding: 8px;
+            background: rgba(0, 20, 45, 0.85);
+            border: 1px solid rgba(0, 170, 255, 0.4);
+            color: #e0f2fe;
+            border-radius: 8px;
+            font-size: 12px;
+            margin-bottom: 14px;
+            outline: none;
+        }
+
+        .calib-btn-row {
+            display: flex;
+            gap: 8px;
+            margin-top: 14px;
+        }
+
+        .calib-btn {
+            flex: 1;
+            padding: 8px;
+            border-radius: 8px;
+            border: 1px solid rgba(0, 170, 255, 0.4);
+            background: rgba(0, 170, 255, 0.15);
+            color: #e0f2fe;
+            font-size: 11px;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.2s ease;
+            text-align: center;
+        }
+        .calib-btn:hover {
+            background: #00aaff;
+            color: #020617;
+            box-shadow: 0 0 12px #00aaff;
+        }
+
+        .toast {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background: rgba(0, 170, 255, 0.95);
+            color: #020617;
+            padding: 10px 18px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 700;
+            box-shadow: 0 0 20px #00aaff;
+            z-index: 400;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+        .toast.show {
+            opacity: 1;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+
+    <div class="stage-container" id="stageContainer">
+        <!-- ZOOM-LOCKED 16:9 SCENE STAGE (1280x720 BASE) -->
+        <div class="scene-stage" id="sceneStage">
+
+            <!-- SPACE GLITCH OVERLAY -->
+            <div class="space-glitch-overlay" id="spaceGlitchOverlay" aria-hidden="true">
+                <div class="glitch-scan-band"></div>
+            </div>
+
+            <!-- FALLBACK VECTOR BACKDROP -->
+            <svg class="bg-fallback-svg" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1920 1080" preserveAspectRatio="xMidYMid slice">
+                <defs>
+                    <linearGradient id="skyGrad" x1="0%" y1="0%" x2="100%" y2="100%">
+                        <stop offset="0%" stop-color="#050a1a"/>
+                        <stop offset="50%" stop-color="#0a1836"/>
+                        <stop offset="100%" stop-color="#020409"/>
+                    </linearGradient>
+                    <radialGradient id="auraGlow" cx="50%" cy="50%" r="50%">
+                        <stop offset="0%" stop-color="#00aaff" stop-opacity="0.25"/>
+                        <stop offset="100%" stop-color="#00aaff" stop-opacity="0"/>
+                    </radialGradient>
+                    <linearGradient id="deskGrad" x1="0%" y1="0%" x2="0%" y2="100%">
+                        <stop offset="0%" stop-color="#0a192f"/>
+                        <stop offset="100%" stop-color="#020712"/>
+                    </linearGradient>
+                </defs>
+                <rect width="1920" height="1080" fill="url(#skyGrad)"/>
+                <circle cx="1400" cy="220" r="180" fill="#e0f2fe" opacity="0.12"/>
+                <circle cx="1400" cy="220" r="260" fill="url(#auraGlow)"/>
+                <path d="M 0 620 L 1920 620 L 1920 1080 L 0 1080 Z" fill="url(#deskGrad)"/>
+                <line x1="0" y1="620" x2="1920" y2="620" stroke="#00aaff" stroke-opacity="0.3" stroke-width="2"/>
+            </svg>
+
+            <!-- MAIN EXTERNAL WALLPAPER IMAGE -->
+            <img id="bgImg" class="bg-layer" src="https://i.imgur.com/MwXsvOP.png" alt="Gojo Desktop Wallpaper">
+
+            <!-- INTERMEDIATE REFERENCE LAYER -->
+            <img id="refLayerImg" class="ref-layer hidden" src="Diseño sin título (1).jpg" alt="Capa Intermedia de Referencia de Elementos">
+
+            <!-- STATUS BADGE -->
+            <div class="bg-status-tag" id="bgStatus">Fondo: Gojo Desktop • Vista 3D Live</div>
+
+            <!-- MUSIC PLAYER WIDGET -->
+            <div class="widget glass-panel music-player" id="musicPlayer">
+                <div class="player-header">
+                    <div class="player-title-box">
+                        <div class="gojo-badge">五</div>
+                        <div class="track-info">
+                            <h3 id="trackTitle">Kaikai Kitan</h3>
+                            <p id="trackArtist">Eve • Jujutsu Kaisen</p>
+                        </div>
+                    </div>
+                    <span style="font-size: 16px; color: #38bdf8; cursor: pointer;" id="btnPlaylistToggle">♪</span>
+                </div>
+
+                <!-- Visualizer Bars -->
+                <div class="visualizer-container" id="visContainer">
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                    <div class="vis-bar"></div>
+                </div>
+
+                <!-- Progress Bar -->
+                <div class="progress-box">
+                    <div class="time-row">
+                        <span id="currentTime">0:00</span>
+                        <span id="totalTime">3:52</span>
+                    </div>
+                    <div class="progress-bar-bg" id="progressBar">
+                        <div class="progress-fill" id="progressFill"></div>
+                    </div>
+                </div>
+
+                <!-- Player Controls -->
+                <div class="player-controls">
+                    <button class="btn-ctrl" id="btnPrev" title="Anterior">⏮</button>
+                    <button class="btn-ctrl btn-play" id="btnPlay" title="Reproducir/Pausar">▶</button>
+                    <button class="btn-ctrl" id="btnNext" title="Siguiente">⏭</button>
+
+                    <div class="volume-box">
+                        <span style="font-size: 12px; color: #7dd3fc;">🔊</span>
+                        <input type="range" class="volume-slider" id="volSlider" min="0" max="1" step="0.05" value="0.8">
+                    </div>
+                </div>
+
+                <!-- Playlist Box -->
+                <div class="playlist-mini" id="playlistBox">
+                    <div class="playlist-item active" data-index="0">
+                        <span>1. Kaikai Kitan - Eve</span>
+                        <span>3:52</span>
+                    </div>
+                    <div class="playlist-item" data-index="1">
+                        <span>2. SPECIALZ - King Gnu</span>
+                        <span>3:58</span>
+                    </div>
+                    <div class="playlist-item" data-index="2">
+                        <span>3. Ao no Sumika - Tatsuya Kitani</span>
+                        <span>3:15</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- PHONE WIDGET (BORDERLESS FLOATING GIF) -->
+            <div class="widget phone-widget" id="phoneWidget" title="Teléfono Gojo • Abrir iPhone 3D">
+                <div class="phone-image-frame" id="phoneImageFrame">
+                    <img id="phoneArtworkImg" class="phone-image-photo" src="https://i.imgur.com/3NF8Slr.gif" alt="Teléfono Gojo">
+                </div>
+            </div>
+
+            <!-- TEA CUP WIDGET -->
+            <div class="widget cup-widget" id="cupWidget" title="Taza de Gojo • Ver en 3D">
+                <div class="steam-container">
+                    <div class="steam"></div>
+                    <div class="steam"></div>
+                    <div class="steam"></div>
+                </div>
+                <img id="cupLogoImg" class="cup-logo-img" src="https://i.imgur.com/dUti7Ul.png" alt="Logo Taza Gojo">
+            </div>
+
+            <!-- CLEAN FULLSCREEN 3D CUP OVERLAY -->
+            <div class="cup-3d-overlay" id="cup3dOverlay">
+                <div class="cup-3d-canvas-wrap" id="cup3dCanvasWrap">
+                    <button class="cup-3d-close" id="btnCloseCup3d" title="Cerrar">✕</button>
+                </div>
+            </div>
+
+            <!-- FULLSCREEN IPHONE 3D INTERACTIVE INTERFACE OVERLAY -->
+            <div class="iphone-3d-modal-overlay" id="iphone3dModalOverlay" aria-hidden="true">
+                <svg width="0" height="0" style="position: absolute;">
+                    <defs>
+                        <linearGradient id="iphoneMetalGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+                            <stop offset="0%" stop-color="#94a3b8" />
+                            <stop offset="50%" stop-color="#e2e8f0" />
+                            <stop offset="100%" stop-color="#475569" />
+                        </linearGradient>
+                    </defs>
+                </svg>
+
+                <button type="button" class="iphone-modal-close" id="btnCloseIphone3d" title="Cerrar iPhone 3D">✕</button>
+
+                <div class="scene-3d" id="iphoneScene3d">
+                    <div class="phone-3d-object" id="iphone3dObject">
+                        <div class="phone-edge phone-edge-left"></div>
+                        <div class="phone-edge phone-edge-right"></div>
+                        <div class="phone-edge phone-edge-top"></div>
+                        <div class="phone-edge phone-edge-bottom"></div>
+
+                        <div class="phone-face-front">
+                            <div class="phone-notch">
+                                <div class="notch-camera"></div>
+                                <div class="notch-sensor"></div>
+                            </div>
+
+                            <div class="phone-screen" id="iphoneModalScreen">
+                                <img src="https://i.imgur.com/9qWNX8m.jpeg"
+                                     class="phone-screen-background lock"
+                                     alt="Lock Wallpaper"
+                                     onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'600\' style=\'background:%232563eb\'><text x=\'50%\' y=\'50%\' fill=\'%23fff\' font-size=\'20\' text-anchor=\'middle\'>Lock Screen</text></svg>'" />
+
+                                <img src="https://i.imgur.com/J1YOGul.jpeg"
+                                     class="phone-screen-background home"
+                                     alt="Home Wallpaper"
+                                     onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'300\' height=\'600\' style=\'background:%230f172a\'><text x=\'50%\' y=\'50%\' fill=\'%23fff\' font-size=\'20\' text-anchor=\'middle\'>Home Screen</text></svg>'" />
+
+                                <div class="phone-overlay"></div>
+
+                                <div class="phone-status" id="iphoneModalStatus">
+                                    <span id="iphoneLiveTimeShort">09:41</span>
+                                    <div class="status-right">
+                                        <span>5G</span>
+                                        <span>52%</span>
+                                    </div>
+                                </div>
+
+                                <div class="phone-time-container">
+                                    <p class="phone-time" id="iphoneLiveTime">09:41</p>
+                                    <p class="phone-date" id="iphoneLiveDate">Saturday, Dec 1</p>
+                                    <p class="phone-xatspace">xatspace shirou</p>
+                                </div>
+
+                                <button type="button" class="iphone-user-avatar" id="iphoneUnlockBtn" aria-label="Unlock Phone">
+                                    <span class="iphone-avatar-container">
+                                        <img class="iphone-avatar-img"
+                                             src="https://i.imgur.com/7yF12zA.jpeg"
+                                             alt="User Avatar"
+                                             onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'100\' height=\'100\' style=\'background:%233b82f6\'><text x=\'50%\' y=\'55%\' fill=\'%23fff\' font-size=\'40\' text-anchor=\'middle\'>👤</text></svg>'" />
+                                    </span>
+                                    <span class="unlock-hint">Tap to unlock</span>
+                                </button>
+
+                                <nav class="iphone-app-dock" aria-label="App Dock">
+                                    <button type="button" class="iphone-app-icon iphone-app-icon__messages" data-app="iphone-app-messages" aria-label="Messages">
+                                        <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-2 .9-2 2v18l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                                    </button>
+                                    <button type="button" class="iphone-app-icon iphone-app-icon__instagram" data-app="iphone-app-instagram" aria-label="Instagram">
+                                        <svg viewBox="0 0 24 24"><path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zm0-2.163c-3.259 0-3.667.014-4.947.072-4.358.2-6.78 2.618-6.98 6.98-.059 1.281-.073 1.689-.073 4.948 0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98 1.281.058 1.689.072 4.948.072 3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98-1.281-.059-1.69-.073-4.949-.073zm0 5.838c-3.403 0-6.162 2.759-6.162 6.162s2.759 6.163 6.162 6.163 6.162-2.759 6.162-6.163c0-3.403-2.759-6.162-6.162-6.162zm0 10.162c-2.209 0-4-1.79-4-4 0-2.209 1.791-4 4-4s4 1.791 4 4c0 2.21-1.791 4-4 4zm6.406-11.845c-.796 0-1.441.645-1.441 1.44s.645 1.44 1.441 1.44c.795 0 1.439-.645 1.439-1.44s-.644-1.44-1.439-1.44z"/></svg>
+                                    </button>
+                                    <button type="button" class="iphone-app-icon iphone-app-icon__themes" data-app="iphone-app-themes" aria-label="Temas">
+                                        <svg viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></svg>
+                                    </button>
+                                    <button type="button" class="iphone-app-icon iphone-app-icon__music" data-app="iphone-app-music" aria-label="Music">
+                                        <svg viewBox="0 0 24 24"><path d="M12 3v10.55c-.59-.34-1.27-.55-2-.55-2.21 0-4 1.79-4 4s1.79 4 4 4 4-1.79 4-4V7h4V3h-6z"/></svg>
+                                    </button>
+                                </nav>
+
+                                <section class="iphone-app-view iphone-messages-app" id="iphone-app-messages" aria-label="Mensajes App">
+                                    <div class="iphone-messages-header">
+                                        <div class="iphone-messages-search">
+                                            <span class="iphone-messages-search-icon">🔍</span>
+                                            <span class="iphone-messages-search-text">Buscar...</span>
+                                        </div>
+                                        <span class="iphone-messages-cancel" id="iphoneMsgCancelBtn">Cancelar</span>
+                                    </div>
+
+                                    <div class="iphone-messages-title-row">
+                                        <h2 class="iphone-messages-title">Mensajes</h2>
+                                        <div style="display: flex; gap: 8px; align-items: center;">
+                                            <button type="button" class="replay-msg-btn" id="iphoneReplayMsgBtn">▶ Repetir</button>
+                                            <span class="iphone-messages-section-action">Editar</span>
+                                        </div>
+                                    </div>
+
+                                    <div class="iphone-messages-list" id="iphoneMsgContainer">
+                                        <div class="iphone-messages-conversation is-hidden" data-msg-idx="0">
+                                            <div class="iphone-messages-contact-name">amorshito</div>
+                                            <div class="iphone-messages-conversation-row">
+                                                <div class="iphone-messages-contact-avatar">
+                                                    <img src="https://i.imgur.com/BUfXZQX.jpeg" alt="amorshito" onerror="this.parentNode.innerHTML='❤️'" />
+                                                </div>
+                                                <div class="iphone-messages-bubble iphone-messages-received">amorshito despierta</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="iphone-messages-conversation is-hidden" data-msg-idx="1">
+                                            <div class="iphone-messages-contact-name">amorshito</div>
+                                            <div class="iphone-messages-conversation-row">
+                                                <div class="iphone-messages-contact-avatar">
+                                                    <img src="https://i.imgur.com/BUfXZQX.jpeg" alt="amorshito" onerror="this.parentNode.innerHTML='❤️'" />
+                                                </div>
+                                                <div class="iphone-messages-bubble iphone-messages-received">come tierra</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="iphone-messages-conversation is-hidden" data-msg-idx="2">
+                                            <div class="iphone-messages-contact-name">amorshito</div>
+                                            <div class="iphone-messages-timestamp">Ahora</div>
+                                            <div class="iphone-messages-conversation-row">
+                                                <div class="iphone-messages-contact-avatar">
+                                                    <img src="https://i.imgur.com/BUfXZQX.jpeg" alt="amorshito" onerror="this.parentNode.innerHTML='❤️'" />
+                                                </div>
+                                                <div class="iphone-messages-bubble iphone-messages-received">te quiero mucho</div>
+                                            </div>
+                                        </div>
+
+                                        <div class="iphone-messages-conversation is-hidden" data-msg-idx="3">
+                                            <div class="iphone-messages-bubble iphone-messages-sent">te amo amorshito</div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="iphone-app-view iphone-themes-app" id="iphone-app-themes" aria-label="Temas App">
+                                    <div class="iphone-themes-header">
+                                        <span class="iphone-themes-back" id="iphoneThemesBackBtn">‹ Inicio</span>
+                                        <span class="iphone-themes-title">Temas</span>
+                                        <span class="iphone-themes-done" id="iphoneThemesDoneBtn">Listo</span>
+                                    </div>
+
+                                    <div class="iphone-themes-content">
+                                        <p class="theme-picker-subtitle">Elige un color para cambiar el iPhone y toda la interfaz de Gojo:</p>
+                                        <div class="theme-swatches-grid" id="iphoneThemeSwatches">
+                                            <button type="button" class="theme-swatch-btn is-selected" data-theme="void-blue" style="--swatch-color:#00aaff;">
+                                                <span class="theme-swatch-dot"></span>
+                                                <span>Azul Mugen</span>
+                                            </button>
+                                            <button type="button" class="theme-swatch-btn" data-theme="crimson-aka" style="--swatch-color:#ff1e42;">
+                                                <span class="theme-swatch-dot"></span>
+                                                <span>Rojo Aka</span>
+                                            </button>
+                                            <button type="button" class="theme-swatch-btn" data-theme="purple-hollow" style="--swatch-color:#a855f7;">
+                                                <span class="theme-swatch-dot"></span>
+                                                <span>Morado Murasaki</span>
+                                            </button>
+                                            <button type="button" class="theme-swatch-btn" data-theme="emerald-cursed" style="--swatch-color:#10b981;">
+                                                <span class="theme-swatch-dot"></span>
+                                                <span>Esmeralda</span>
+                                            </button>
+                                            <button type="button" class="theme-swatch-btn" data-theme="amber-gold" style="--swatch-color:#f59e0b;">
+                                                <span class="theme-swatch-dot"></span>
+                                                <span>Ámbar Six</span>
+                                            </button>
+                                            <button type="button" class="theme-swatch-btn" data-theme="rose-sakura" style="--swatch-color:#ec4899;">
+                                                <span class="theme-swatch-dot"></span>
+                                                <span>Rosa Neón</span>
+                                            </button>
+                                        </div>
+                                        <div class="theme-active-banner">
+                                            <span>Tema actual:</span>
+                                            <span class="theme-active-chip" id="iphoneActiveThemeName">Azul Mugen</span>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="iphone-app-view iphone-instagram-app" id="iphone-app-instagram" aria-label="Instagram App">
+                                    <div class="iphone-instagram-header">
+                                        <div class="iphone-instagram-logo">Instagram</div>
+                                    </div>
+
+                                    <div class="iphone-instagram-feed">
+                                        <!-- Publicación 1 -->
+                                        <div class="iphone-instagram-post">
+                                            <div class="iphone-instagram-post-header">
+                                                <div class="iphone-instagram-post-avatar">
+                                                    <img src="https://i.imgur.com/gqnplml.jpeg" alt="sivi" onerror="this.parentNode.innerHTML='S'" />
+                                                </div>
+                                                <div>
+                                                    <div class="iphone-instagram-post-username">sivi</div>
+                                                    <div class="iphone-instagram-post-location">Tokyo, Japan</div>
+                                                </div>
+                                            </div>
+                                            <div class="iphone-instagram-post-image">
+                                                <img src="https://i.imgur.com/6gEldEd.jpeg" alt="Post 1" />
+                                            </div>
+                                            <div class="iphone-instagram-post-actions">
+                                                <button type="button" class="iphone-instagram-action-btn iphone-like-btn" aria-label="Like">
+                                                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                                </button>
+                                                <button type="button" class="iphone-instagram-action-btn" aria-label="Comment">
+                                                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                                                </button>
+                                            </div>
+                                            <div class="iphone-instagram-post-caption">
+                                                <span class="username-tag">sivi</span> funen a shirou
+                                            </div>
+                                        </div>
+
+                                        <!-- Publicación 2 -->
+                                        <div class="iphone-instagram-post">
+                                            <div class="iphone-instagram-post-header">
+                                                <div class="iphone-instagram-post-avatar">
+                                                    <img src="https://i.imgur.com/6gEldEd.jpeg" alt="xshirou" onerror="this.parentNode.innerHTML='X'" />
+                                                </div>
+                                                <div>
+                                                    <div class="iphone-instagram-post-username">xshirou</div>
+                                                    <div class="iphone-instagram-post-location">Night City</div>
+                                                </div>
+                                            </div>
+                                            <div class="iphone-instagram-post-image">
+                                                <img src="https://i.imgur.com/nQFGzM1.jpeg" alt="Post 2" />
+                                            </div>
+                                            <div class="iphone-instagram-post-actions">
+                                                <button type="button" class="iphone-instagram-action-btn iphone-like-btn" aria-label="Like">
+                                                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                                </button>
+                                                <button type="button" class="iphone-instagram-action-btn" aria-label="Comment">
+                                                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                                                </button>
+                                            </div>
+                                            <div class="iphone-instagram-post-caption">
+                                                <span class="username-tag">xshirou</span> cyber bug fue tan bueno que sacaron parte 2
+                                            </div>
+                                        </div>
+
+                                        <!-- Publicación 3 -->
+                                        <div class="iphone-instagram-post">
+                                            <div class="iphone-instagram-post-header">
+                                                <div class="iphone-instagram-post-avatar">
+                                                    <img src="https://i.imgur.com/6gEldEd.jpeg" alt="xshirou" onerror="this.parentNode.innerHTML='X'" />
+                                                </div>
+                                                <div>
+                                                    <div class="iphone-instagram-post-username">xshirou</div>
+                                                    <div class="iphone-instagram-post-location">Hyrule</div>
+                                                </div>
+                                            </div>
+                                            <div class="iphone-instagram-post-image">
+                                                <img src="https://i.imgur.com/M5KJYRt.jpeg" alt="Post 3" />
+                                            </div>
+                                            <div class="iphone-instagram-post-actions">
+                                                <button type="button" class="iphone-instagram-action-btn iphone-like-btn" aria-label="Like">
+                                                    <svg viewBox="0 0 24 24"><path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/></svg>
+                                                </button>
+                                                <button type="button" class="iphone-instagram-action-btn" aria-label="Comment">
+                                                    <svg viewBox="0 0 24 24"><path d="M20 2H4c-1.1 0-1.99.9-1.99 2L2 22l4-4h14c1.1 0 2-.9 2-2V4c0-1.1-.9-2-2-2z"/></svg>
+                                                </button>
+                                            </div>
+                                            <div class="iphone-instagram-post-caption">
+                                                <span class="username-tag">xshirou</span> si no te contesto estoy jugando a zelda
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <section class="iphone-app-view iphone-music-app" id="iphone-app-music" aria-label="Music App">
+                                    <div class="iphone-music-content">
+                                        <div class="iphone-music-header">
+                                            <span class="iphone-music-live-tag">Gojo Music SYNC</span>
+                                            <div class="iphone-music-artist-name" id="iphoneMusicHeaderArtist">Eve</div>
+                                        </div>
+
+                                        <div class="iphone-music-album-art">
+                                            <img id="iphoneMusicAlbumCover"
+                                                 src="https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80"
+                                                 alt="Album Cover"
+                                                 onerror="this.src='data:image/svg+xml;utf8,<svg xmlns=\'http://www.w3.org/2000/svg\' width=\'180\' height=\'180\' style=\'background:%23600\'><text x=\'50%\' y=\'55%\' fill=\'%23fff\' font-size=\'40\' text-anchor=\'middle\'>🎵</text></svg>'" />
+                                        </div>
+
+                                        <div class="iphone-music-controls">
+                                            <div class="iphone-music-song-info">
+                                                <div class="iphone-music-song-title" id="iphoneMusicSongTitle">Kaikai Kitan</div>
+                                                <div class="iphone-music-song-artist" id="iphoneMusicSongArtist">Eve</div>
+
+                                                <div class="iphone-music-transport">
+                                                    <button type="button" class="music-nav-btn" id="iphoneBtnPrevTrack" title="Anterior" aria-label="Anterior">⏮</button>
+                                                    <button type="button" class="music-toggle-btn" id="iphonePulsantePlayPause" aria-label="Play / Pause">
+                                                        <span class="play-triangle"></span>
+                                                        <span class="pause-bars">
+                                                            <span></span>
+                                                            <span></span>
+                                                        </span>
+                                                    </button>
+                                                    <button type="button" class="music-nav-btn" id="iphoneBtnNextTrack" title="Siguiente" aria-label="Siguiente">⏭</button>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </section>
+
+                                <button type="button" class="iphone-home-indicator" id="iphoneHomeBtn" title="Toca o desliza hacia arriba para cerrar" aria-label="Home Indicator"></button>
+                            </div>
+                        </div>
+
+                        <div class="phone-face-back">
+                            <div class="camera-bump">
+                                <div class="camera-lens lens-1"></div>
+                                <div class="camera-lens lens-2"></div>
+                                <div class="camera-lens lens-3"></div>
+                                <div class="flash-led"></div>
+                                <div class="lidar-sensor"></div>
+                            </div>
+
+                            <svg class="apple-logo" viewBox="0 0 170 170">
+                                <path d="M150.37 130.25c-2.45 5.66-5.35 10.87-8.71 15.66-4.58 6.53-8.33 11.05-11.22 13.56-4.48 4.12-9.28 6.23-14.42 6.35-3.69 0-8.14-1.05-13.32-3.18-5.19-2.12-9.97-3.17-14.34-3.17-4.58 0-9.49 1.05-14.75 3.17-5.26 2.13-9.5 3.24-12.74 3.35-4.33.13-9.13-1.9-14.42-6.1-3.48-2.81-7.44-7.57-11.89-14.28-6.13-9.37-11.02-20.08-14.67-32.14-3.65-12.06-5.48-23.77-5.48-35.14 0-15.01 3.57-27.42 10.72-37.23 7.15-9.81 16.32-14.78 27.52-14.9 5.2 0 10.74 1.34 16.63 4.02 5.88 2.68 9.94 4.02 12.18 4.02 1.86 0 6.07-1.39 12.63-4.17 6.56-2.78 12.11-4.04 16.64-3.78 12.44.97 22.09 5.56 28.95 13.78-11.03 6.66-16.42 15.86-16.17 27.6.25 9.4 3.86 17.2 10.83 23.39 6.97 6.19 15.35 9.61 25.13 10.25-2.22 6.68-4.78 13.07-7.69 19.16zM119.22 31.08c0-7.39 2.67-14.54 8.01-21.45 5.34-6.91 12.09-11.23 20.25-12.96.6 7.64-1.92 14.88-7.56 21.73-5.64 6.85-12.49 11.05-20.55 12.61-.05-.01-.15-.08-.15-.08s0-.07 0-.15z" />
+                            </svg>
+
+                            <div class="phone-back-text">Designed by Apple in California</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="drag-hint-badge">
+                    🖐️ Arrastra para rotar en 3D • Toca o desliza hacia arriba la barra inferior para cerrar apps
+                </div>
+            </div>
+
+            <!-- CHIBI GOJO WIDGET -->
+            <div class="widget chibi-widget mood-happy" id="chibiWidget" title="Chibi Satoru - Clic para cambiar estado">
+                <div class="chibi-stage">
+                    <img id="chibiSpriteImg" class="chibi-sprite-img" src="https://i.imgur.com/8MbLgm8.png" alt="Chibi Satoru Gojo">
+                    <span class="chibi-fx-badge" id="chibiMoodBadge">✨</span>
+                </div>
+                <div class="chibi-quote" id="chibiQuote">Feliz • "¡Saikyou!"</div>
+            </div>
+
+            <!-- RIGHT NAVIGATION MENU -->
+            <div class="widget right-menu" id="rightMenuWidget">
+                <button id="btnMenuHome" title="Inicio / Restablecer Posiciones">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M3 10.5L12 3l9 7.5V20a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1v-9.5z"/>
+                    </svg>
+                </button>
+                <button id="btnMenuGlitch" title="Activar/Desactivar Efecto Glitch del Space">
+                    <svg viewBox="0 0 24 24">
+                        <path d="M4 6h11l-2 4h7l-11 9 2-5H4z"/>
+                    </svg>
+                </button>
+                <button id="btnMenuGrid" title="Activar/Desactivar Filtro Pixel Art">
+                    <svg viewBox="0 0 24 24">
+                        <rect x="3" y="3" width="6" height="6"/>
+                        <rect x="9" y="9" width="6" height="6"/>
+                        <rect x="15" y="15" width="6" height="6"/>
+                        <rect x="15" y="3" width="6" height="6"/>
+                        <rect x="3" y="15" width="6" height="6"/>
+                    </svg>
+                </button>
+                <button id="btnMenuCalib" title="Panel de Calibración">
+                    <svg viewBox="0 0 24 24">
+                        <circle cx="12" cy="12" r="3"/>
+                        <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/>
+                    </svg>
+                </button>
+            </div>
+
+            <!-- CALIBRATION PANEL DRAWER -->
+            <div class="calib-panel" id="calibPanel">
+                <div class="calib-header">
+                    <h2>⚙️ Calibrador Live 3D</h2>
+                    <span style="cursor: pointer; color: #94a3b8;" id="btnCloseCalib">✖</span>
+                </div>
+
+                <label style="font-size: 11px; color: #7dd3fc; margin-bottom: 4px; display: block;">Seleccionar Elemento:</label>
+                <select class="calib-select" id="calibTargetSelect">
+                    <option value="musicPlayer">Reproductor de Música</option>
+                    <option value="phoneWidget">Teléfono Gojo</option>
+                    <option value="rightMenuWidget">Menú Lateral Derecho</option>
+                    <option value="cupWidget">Taza Gojo</option>
+                    <option value="chibiWidget">Chibi Gojo</option>
+                </select>
+
+                <div class="calib-group">
+                    <label>Izquierda (Left %): <span id="valLeft">3.8</span>%</label>
+                    <input type="range" id="inpLeft" min="0" max="100" step="0.1" value="3.8">
+                </div>
+
+                <div class="calib-group">
+                    <label>Arriba (Top %): <span id="valTop">49.5</span>%</label>
+                    <input type="range" id="inpTop" min="0" max="100" step="0.1" value="49.5">
+                </div>
+
+                <div class="calib-group">
+                    <label>Escala: <span id="valScale">1.00</span></label>
+                    <input type="range" id="inpScale" min="0.4" max="6.0" step="0.02" value="1.00">
+                </div>
+
+                <div class="calib-group">
+                    <label>Inclinación X (RotX): <span id="valRotX">0</span>°</label>
+                    <input type="range" id="inpRotX" min="-90" max="90" step="1" value="0">
+                </div>
+
+                <div class="calib-group">
+                    <label>Giro Y (RotY): <span id="valRotY">4</span>°</label>
+                    <input type="range" id="inpRotY" min="-90" max="90" step="1" value="4">
+                </div>
+
+                <div class="calib-group">
+                    <label>Inclinación Y (SkewY): <span id="valSkewY">0</span>°</label>
+                    <input type="range" id="inpSkewY" min="-45" max="45" step="0.5" value="0">
+                </div>
+
+                <div class="calib-group">
+                    <label>Rotación Z (RotZ): <span id="valRotZ">0</span>°</label>
+                    <input type="range" id="inpRotZ" min="-180" max="180" step="0.5" value="0">
+                </div>
+
+                <div class="calib-btn-row">
+                    <button class="calib-btn" id="btnToggleRefLayer">👁️ Capa Ref</button>
+                    <button class="calib-btn" id="btnSaveConfig">💾 Guardar</button>
+                    <button class="calib-btn" id="btnCopyCSS">📋 Copiar CSS</button>
+                </div>
+            </div>
+
+            <!-- TOAST NOTIFICATION -->
+            <div class="toast" id="toastMsg">Configuración guardada correctamente</div>
+
+        </div>
+    </div>
+
+    <!-- JAVASCRIPT APPLICATION LOGIC -->
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            try {
+                // ==========================================================
+                // ZOOM IMMUNITY ENGINE
+                // ==========================================================
+                const sceneStage = document.getElementById('sceneStage');
+                const BASE_WIDTH = 1280;
+                const BASE_HEIGHT = 720;
+
+                function applyZoomImmuneFit() {
+                    const vv = window.visualViewport;
+                    const viewW = vv ? vv.width : window.innerWidth;
+                    const viewH = vv ? vv.height : window.innerHeight;
+
+                    const fitScale = Math.min(viewW / BASE_WIDTH, viewH / BASE_HEIGHT);
+                    sceneStage.style.transform = `scale(${fitScale})`;
+                }
+
+                window.addEventListener('wheel', (e) => {
+                    if (e.ctrlKey || e.metaKey) {
+                        e.preventDefault();
+                        applyZoomImmuneFit();
+                    }
+                }, { passive: false });
+
+                window.addEventListener('keydown', (e) => {
+                    if ((e.ctrlKey || e.metaKey) && ['+', '-', '=', '0'].includes(e.key)) {
+                        e.preventDefault();
+                        applyZoomImmuneFit();
+                    }
+                });
+
+                window.addEventListener('resize', applyZoomImmuneFit);
+                if (window.visualViewport) {
+                    window.visualViewport.addEventListener('resize', applyZoomImmuneFit);
+                    window.visualViewport.addEventListener('scroll', applyZoomImmuneFit);
+                }
+                applyZoomImmuneFit();
+
+                let audioCtx = null;
+                let animFrameId = null;
+
+                function unlockAudioContext() {
+                    if (!audioCtx) {
+                        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                    }
+                    if (audioCtx && audioCtx.state === 'suspended') {
+                        audioCtx.resume();
+                    }
+                }
+                document.addEventListener('click', unlockAudioContext, { once: true });
+                document.addEventListener('touchstart', unlockAudioContext, { once: true });
+
+                // ==========================================================
+                // DEFAULT CALIBRATION & CONFIG PERSISTENCE
+                // ==========================================================
+                const CONFIG_VERSION = "v3.6_phone_gif_right_menu_pixel";
+
+                const DEFAULT_CONFIG = {
+                    version: CONFIG_VERSION,
+                    bgFit: 'cover',
+                    widgets: {
+                        musicPlayer:     { left: 3.8,  top: 49.5, scale: 1.00, rotX: 0,   rotY: 4,   rotZ: 0,  skewY: 0,    opacity: 1 },
+                        phoneWidget:     { left: 71.0, top: 47.6, scale: 1.00, rotX: 9,   rotY: -31, rotZ: 13, skewY: -9.5, opacity: 1 },
+                        rightMenuWidget: { left: 94.1, top: 5.1,  scale: 1.16, rotX: 0,   rotY: 0,   rotZ: 0,  skewY: 0,    opacity: 1 },
+                        cupWidget:       { left: 36.4, top: 73.5, scale: 4.60, rotX: 6,   rotY: 0,   rotZ: 0,  skewY: 0,    opacity: 1 },
+                        chibiWidget:     { left: 87.0, top: 68.7, scale: 2.50, rotX: -26, rotY: -9,  rotZ: 0,  skewY: 0,    opacity: 1 },
+                    }
+                };
+
+                let activeConfig;
+                const savedConfig = localStorage.getItem('gojo_player_config');
+
+                if (savedConfig) {
+                    try {
+                        const parsed = JSON.parse(savedConfig);
+                        if (parsed && parsed.version === CONFIG_VERSION) {
+                            activeConfig = parsed;
+                        } else {
+                            activeConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+                            localStorage.setItem('gojo_player_config', JSON.stringify(activeConfig));
+                        }
+                    } catch (e) {
+                        activeConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+                    }
+                } else {
+                    activeConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+                }
+
+                const widgets = {
+                    musicPlayer: document.getElementById('musicPlayer'),
+                    phoneWidget: document.getElementById('phoneWidget'),
+                    rightMenuWidget: document.getElementById('rightMenuWidget'),
+                    cupWidget: document.getElementById('cupWidget'),
+                    chibiWidget: document.getElementById('chibiWidget'),
+                };
+
+                const bgImg = document.getElementById('bgImg');
+                const refLayerImg = document.getElementById('refLayerImg');
+                const bgStatus = document.getElementById('bgStatus');
+
+                const phoneArtworkImg = document.getElementById('phoneArtworkImg');
+                if (phoneArtworkImg) {
+                    phoneArtworkImg.onerror = () => {
+                        phoneArtworkImg.src = 'https://placehold.co/150x315/06132b/38bdf8?text=GOJO';
+                    };
+                }
+
+                if (bgImg) {
+                    bgImg.onerror = () => {
+                        bgImg.style.display = 'none';
+                        if (bgStatus) bgStatus.textContent = "Fondo: Escena Vectorial Fallback";
+                    };
+                }
+
+                if (refLayerImg) {
+                    refLayerImg.onerror = () => {
+                        refLayerImg.style.display = 'none';
+                    };
+                }
+
+                const cupLogoImg = document.getElementById('cupLogoImg');
+                if (cupLogoImg) {
+                    cupLogoImg.onerror = () => {
+                        cupLogoImg.src = 'https://placehold.co/64x64/0284c7/e0f2fe?text=☕';
+                    };
+                }
+
+                const chibiSpriteImg = document.getElementById('chibiSpriteImg');
+                const CHIBI_DEFAULT_SRC = 'https://i.imgur.com/8MbLgm8.png';
+                const CHIBI_BLUE_SRC = 'https://i.imgur.com/L6ZmAvl.png';
+                const CHIBI_RED_SRC = 'https://i.imgur.com/sTZKy1l.png';
+                let chibiVariantIdx = 0;
+
+                if (chibiSpriteImg) {
+                    chibiSpriteImg.onerror = () => {
+                        if (chibiSpriteImg.src !== CHIBI_DEFAULT_SRC) {
+                            chibiSpriteImg.src = CHIBI_DEFAULT_SRC;
+                            chibiVariantIdx = 0;
+                            chibiSpriteImg.classList.remove('variant-blue', 'variant-red');
+                            showToast('No se pudo cargar la imagen externa, volviendo al Mini Gojo 1');
+                        } else {
+                            chibiSpriteImg.style.display = 'none';
+                        }
+                    };
+                }
+
+                const btnToggleRefLayer = document.getElementById('btnToggleRefLayer');
+                if (btnToggleRefLayer && refLayerImg) {
+                    btnToggleRefLayer.addEventListener('click', () => {
+                        const isHidden = refLayerImg.classList.toggle('hidden');
+                        showToast(isHidden ? "Capa intermedia oculta" : "Capa intermedia visible");
+                    });
+                }
+
+                function applyWidgetStyle(key) {
+                    const el = widgets[key];
+                    const cfg = activeConfig.widgets[key];
+                    if (!el || !cfg) return;
+
+                    const skewYVal = cfg.skewY || 0;
+                    el.style.left = cfg.left + '%';
+                    el.style.top = cfg.top + '%';
+                    el.style.transform = `scale(${cfg.scale}) rotateX(${cfg.rotX}deg) rotateY(${cfg.rotY}deg) rotateZ(${cfg.rotZ}deg) skewY(${skewYVal}deg)`;
+                    el.style.opacity = cfg.opacity !== undefined ? cfg.opacity : 1;
+                }
+
+                function renderAllWidgets() {
+                    Object.keys(widgets).forEach(applyWidgetStyle);
+                }
+
+                renderAllWidgets();
+
+                // ==========================================================
+                // LIVE CALIBRATION PANEL
+                // ==========================================================
+                const calibPanel = document.getElementById('calibPanel');
+                const calibTargetSelect = document.getElementById('calibTargetSelect');
+                const inpLeft = document.getElementById('inpLeft');
+                const inpTop = document.getElementById('inpTop');
+                const inpScale = document.getElementById('inpScale');
+                const inpRotX = document.getElementById('inpRotX');
+                const inpRotY = document.getElementById('inpRotY');
+                const inpSkewY = document.getElementById('inpSkewY');
+                const inpRotZ = document.getElementById('inpRotZ');
+
+                const valLeft = document.getElementById('valLeft');
+                const valTop = document.getElementById('valTop');
+                const valScale = document.getElementById('valScale');
+                const valRotX = document.getElementById('valRotX');
+                const valRotY = document.getElementById('valRotY');
+                const valSkewY = document.getElementById('valSkewY');
+                const valRotZ = document.getElementById('valRotZ');
+
+                function updateCalibUI() {
+                    const key = calibTargetSelect.value;
+                    const cfg = activeConfig.widgets[key];
+                    if (!cfg) return;
+
+                    inpLeft.value = cfg.left;
+                    inpTop.value = cfg.top;
+                    inpScale.value = cfg.scale;
+                    inpRotX.value = cfg.rotX;
+                    inpRotY.value = cfg.rotY;
+                    inpSkewY.value = cfg.skewY || 0;
+                    inpRotZ.value = cfg.rotZ;
+
+                    valLeft.textContent = Number(cfg.left).toFixed(1);
+                    valTop.textContent = Number(cfg.top).toFixed(1);
+                    valScale.textContent = Number(cfg.scale).toFixed(2);
+                    valRotX.textContent = cfg.rotX;
+                    valRotY.textContent = cfg.rotY;
+                    valSkewY.textContent = cfg.skewY || 0;
+                    valRotZ.textContent = cfg.rotZ;
+
+                    Object.keys(widgets).forEach(k => {
+                        if (widgets[k]) {
+                            if (k === key) widgets[k].classList.add('widget-selected');
+                            else widgets[k].classList.remove('widget-selected');
+                        }
+                    });
+                }
+
+                calibTargetSelect.addEventListener('change', updateCalibUI);
+
+                function onSliderChange() {
+                    const key = calibTargetSelect.value;
+                    if (!activeConfig.widgets[key]) return;
+
+                    activeConfig.widgets[key].left = parseFloat(inpLeft.value);
+                    activeConfig.widgets[key].top = parseFloat(inpTop.value);
+                    activeConfig.widgets[key].scale = parseFloat(inpScale.value);
+                    activeConfig.widgets[key].rotX = parseFloat(inpRotX.value);
+                    activeConfig.widgets[key].rotY = parseFloat(inpRotY.value);
+                    activeConfig.widgets[key].skewY = parseFloat(inpSkewY.value);
+                    activeConfig.widgets[key].rotZ = parseFloat(inpRotZ.value);
+
+                    applyWidgetStyle(key);
+                    updateCalibUI();
+                }
+
+                [inpLeft, inpTop, inpScale, inpRotX, inpRotY, inpSkewY, inpRotZ].forEach(input => {
+                    if (input) {
+                        input.addEventListener('input', onSliderChange);
+                    }
+                });
+
+                document.getElementById('btnMenuCalib').addEventListener('click', () => {
+                    calibPanel.classList.toggle('active');
+                    if (calibPanel.classList.contains('active')) updateCalibUI();
+                    else Object.keys(widgets).forEach(k => widgets[k] && widgets[k].classList.remove('widget-selected'));
+                });
+
+                document.getElementById('btnCloseCalib').addEventListener('click', () => {
+                    calibPanel.classList.remove('active');
+                    Object.keys(widgets).forEach(k => widgets[k] && widgets[k].classList.remove('widget-selected'));
+                });
+
+                function showToast(msg) {
+                    const toast = document.getElementById('toastMsg');
+                    if (!toast) return;
+                    toast.textContent = msg;
+                    toast.classList.add('show');
+                    setTimeout(() => toast.classList.remove('show'), 2200);
+                }
+
+                document.getElementById('btnSaveConfig').addEventListener('click', () => {
+                    localStorage.setItem('gojo_player_config', JSON.stringify(activeConfig));
+                    showToast('¡Configuración guardada!');
+                });
+
+                function resetPositions() {
+                    activeConfig = JSON.parse(JSON.stringify(DEFAULT_CONFIG));
+                    localStorage.setItem('gojo_player_config', JSON.stringify(activeConfig));
+                    renderAllWidgets();
+                    applyZoomImmuneFit();
+                    if (calibPanel.classList.contains('active')) updateCalibUI();
+                    showToast('Posiciones restablecidas');
+                }
+
+                document.getElementById('btnMenuHome').addEventListener('click', resetPositions);
+
+                document.getElementById('btnCopyCSS').addEventListener('click', () => {
+                    let cssText = '/* Gojo Player Positions */\n';
+                    Object.keys(activeConfig.widgets).forEach(k => {
+                        const cfg = activeConfig.widgets[k];
+                        const skewYVal = cfg.skewY || 0;
+                        cssText += `.${k} { left: ${cfg.left}%; top: ${cfg.top}%; transform: scale(${cfg.scale}) rotateX(${cfg.rotX}deg) rotateY(${cfg.rotY}deg) rotateZ(${cfg.rotZ}deg) skewY(${skewYVal}deg); }\n`;
+                    });
+
+                    const tempTextArea = document.createElement('textarea');
+                    tempTextArea.value = cssText;
+                    document.body.appendChild(tempTextArea);
+                    tempTextArea.select();
+                    document.execCommand('copy');
+                    document.body.removeChild(tempTextArea);
+
+                    showToast('¡CSS copiado al portapapeles!');
+                });
+
+                // Pixel Art Filter Toggle on #btnMenuGrid
+                const btnMenuGrid = document.getElementById('btnMenuGrid');
+                if (btnMenuGrid && sceneStage) {
+                    btnMenuGrid.addEventListener('click', () => {
+                        const isPixelArt = sceneStage.classList.toggle('pixel-art-active');
+                        btnMenuGrid.classList.toggle('active-mode', isPixelArt);
+                        showToast(isPixelArt ? 'Filtro Pixel Art activado' : 'Filtro Pixel Art desactivado');
+                    });
+                }
+
+                function playGlitchErrorSound() {
+                    try {
+                        if (!audioCtx) {
+                            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        }
+                        if (audioCtx.state === 'suspended') {
+                            audioCtx.resume();
+                        }
+
+                        const now = audioCtx.currentTime;
+
+                        const oscA = audioCtx.createOscillator();
+                        const gainA = audioCtx.createGain();
+                        oscA.type = 'sawtooth';
+                        oscA.frequency.setValueAtTime(195, now);
+                        oscA.frequency.setValueAtTime(135, now + 0.06);
+                        oscA.frequency.setValueAtTime(92, now + 0.12);
+                        gainA.gain.setValueAtTime(0.14, now);
+                        gainA.gain.exponentialRampToValueAtTime(0.001, now + 0.24);
+                        oscA.connect(gainA);
+                        gainA.connect(audioCtx.destination);
+                        oscA.start(now);
+                        oscA.stop(now + 0.24);
+
+                        const oscB = audioCtx.createOscillator();
+                        const gainB = audioCtx.createGain();
+                        oscB.type = 'square';
+                        oscB.frequency.setValueAtTime(420, now + 0.03);
+                        oscB.frequency.exponentialRampToValueAtTime(110, now + 0.2);
+                        gainB.gain.setValueAtTime(0.07, now + 0.03);
+                        gainB.gain.exponentialRampToValueAtTime(0.001, now + 0.21);
+                        oscB.connect(gainB);
+                        gainB.connect(audioCtx.destination);
+                        oscB.start(now + 0.03);
+                        oscB.stop(now + 0.21);
+                    } catch (e) {}
+                }
+
+                // Space Glitch Toggle on #btnMenuGlitch
+                const btnMenuGlitch = document.getElementById('btnMenuGlitch');
+                if (btnMenuGlitch && sceneStage) {
+                    btnMenuGlitch.addEventListener('click', () => {
+                        playGlitchErrorSound();
+                        const isGlitchActive = sceneStage.classList.toggle('space-glitch-active');
+                        btnMenuGlitch.classList.toggle('active-mode', isGlitchActive);
+
+                        chibiStateIdx = 2;
+                        chibiVariantIdx = 2;
+                        if (widgets.chibiWidget) {
+                            widgets.chibiWidget.classList.remove('mood-happy', 'mood-love', 'mood-angry');
+                            widgets.chibiWidget.classList.add(chibiStates[2].moodClass);
+                        }
+                        if (chibiMoodBadge) chibiMoodBadge.textContent = chibiStates[2].badge;
+                        if (chibiQuote) chibiQuote.textContent = chibiStates[2].quote;
+                        if (chibiSpriteImg) {
+                            chibiSpriteImg.classList.remove('variant-blue', 'variant-red', 'swap-anim');
+                            chibiSpriteImg.classList.add('variant-red');
+                            chibiSpriteImg.src = CHIBI_RED_SRC;
+                            void chibiSpriteImg.offsetWidth;
+                            chibiSpriteImg.classList.add('swap-anim');
+                        }
+
+                        showToast(isGlitchActive ? 'Efecto Glitch activado en el Space' : 'Efecto Glitch desactivado');
+                    });
+                }
+
+                // ==========================================================
+                // SYNCHRONIZED AUDIO PLAYER + IPHONE MUSIC APP
+                // ==========================================================
+                const TRACKS = [
+                    {
+                        title: 'Kaikai Kitan',
+                        artist: 'Eve',
+                        duration: 232,
+                        freq: 110,
+                        cover: 'https://images.unsplash.com/photo-1511671782779-c97d3d27a1d4?auto=format&fit=crop&w=400&q=80'
+                    },
+                    {
+                        title: 'SPECIALZ',
+                        artist: 'King Gnu',
+                        duration: 238,
+                        freq: 130.81,
+                        cover: 'https://images.unsplash.com/photo-1514525253161-7a46d19cd819?auto=format&fit=crop&w=400&q=80'
+                    },
+                    {
+                        title: 'Ao no Sumika',
+                        artist: 'Tatsuya Kitani',
+                        duration: 195,
+                        freq: 146.83,
+                        cover: 'https://images.unsplash.com/photo-1470225620780-dba8ba36b745?auto=format&fit=crop&w=400&q=80'
+                    }
+                ];
+
+                let currentTrackIdx = 0;
+                let isPlaying = false;
+                let synthOsc = null;
+                let synthGain = null;
+                let secondsElapsed = 0;
+                let totalSeconds = TRACKS[0].duration;
+
+                const btnPlay = document.getElementById('btnPlay');
+                const iphonePlayPauseBtn = document.getElementById('iphonePulsantePlayPause');
+                const progressFill = document.getElementById('progressFill');
+                const currentTimeEl = document.getElementById('currentTime');
+                const totalTimeEl = document.getElementById('totalTime');
+                const visBars = document.querySelectorAll('.vis-bar');
+
+                function formatTime(s) {
+                    const mins = Math.floor(s / 60);
+                    const secs = Math.floor(s % 60);
+                    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
+                }
+
+                function syncPlayStateUI(playing) {
+                    if (btnPlay) btnPlay.textContent = playing ? '⏸' : '▶';
+                    if (iphonePlayPauseBtn) iphonePlayPauseBtn.classList.toggle('is-playing', playing);
+                }
+
+                function syncTrackUI(idx, notify = false) {
+                    currentTrackIdx = (idx + TRACKS.length) % TRACKS.length;
+                    const track = TRACKS[currentTrackIdx];
+                    totalSeconds = track.duration;
+                    secondsElapsed = 0;
+
+                    const trackTitleEl = document.getElementById('trackTitle');
+                    const trackArtistEl = document.getElementById('trackArtist');
+                    if (trackTitleEl) trackTitleEl.textContent = track.title;
+                    if (trackArtistEl) trackArtistEl.textContent = `${track.artist} • Jujutsu Kaisen`;
+                    if (totalTimeEl) totalTimeEl.textContent = formatTime(track.duration);
+                    if (currentTimeEl) currentTimeEl.textContent = '0:00';
+                    if (progressFill) progressFill.style.width = '0%';
+
+                    document.querySelectorAll('#playlistBox .playlist-item').forEach((item, i) => {
+                        item.classList.toggle('active', i === currentTrackIdx);
+                    });
+
+                    const ipHeaderArtist = document.getElementById('iphoneMusicHeaderArtist');
+                    const ipSongTitle = document.getElementById('iphoneMusicSongTitle');
+                    const ipSongArtist = document.getElementById('iphoneMusicSongArtist');
+                    const ipAlbumCover = document.getElementById('iphoneMusicAlbumCover');
+                    if (ipHeaderArtist) ipHeaderArtist.textContent = track.artist;
+                    if (ipSongTitle) ipSongTitle.textContent = track.title;
+                    if (ipSongArtist) ipSongArtist.textContent = track.artist;
+                    if (ipAlbumCover) ipAlbumCover.src = track.cover;
+
+                    if (isPlaying) {
+                        stopPlayback(false);
+                        startPlayback(false);
+                    }
+
+                    if (notify) {
+                        showToast(`${track.title} — ${track.artist}`);
+                    }
+                }
+
+                function playMessageNotificationSound() {
+                    try {
+                        if (!audioCtx) {
+                            audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                        }
+                        if (audioCtx.state === 'suspended') {
+                            audioCtx.resume();
+                        }
+
+                        const now = audioCtx.currentTime;
+
+                        const osc1 = audioCtx.createOscillator();
+                        const gain1 = audioCtx.createGain();
+                        osc1.type = 'sine';
+                        osc1.frequency.setValueAtTime(880, now);
+                        gain1.gain.setValueAtTime(0.12, now);
+                        gain1.gain.exponentialRampToValueAtTime(0.001, now + 0.3);
+                        osc1.connect(gain1);
+                        gain1.connect(audioCtx.destination);
+                        osc1.start(now);
+                        osc1.stop(now + 0.3);
+
+                        const osc2 = audioCtx.createOscillator();
+                        const gain2 = audioCtx.createGain();
+                        osc2.type = 'sine';
+                        osc2.frequency.setValueAtTime(1318.51, now + 0.1);
+                        gain2.gain.setValueAtTime(0.15, now + 0.1);
+                        gain2.gain.exponentialRampToValueAtTime(0.001, now + 0.55);
+                        osc2.connect(gain2);
+                        gain2.connect(audioCtx.destination);
+                        osc2.start(now + 0.1);
+                        osc2.stop(now + 0.55);
+                    } catch (e) {
+                        console.log('Audio chime auto-play restriction:', e);
+                    }
+                }
+
+                const volSlider = document.getElementById('volSlider');
+                const progressBar = document.getElementById('progressBar');
+                const btnPrev = document.getElementById('btnPrev');
+                const btnNext = document.getElementById('btnNext');
+                const iphoneBtnPrevTrack = document.getElementById('iphoneBtnPrevTrack');
+                const iphoneBtnNextTrack = document.getElementById('iphoneBtnNextTrack');
+                const btnPlaylistToggle = document.getElementById('btnPlaylistToggle');
+                const playlistBox = document.getElementById('playlistBox');
+
+                function updateSpectrumVisualizer() {
+                    if (!isPlaying) return;
+
+                    visBars.forEach((bar, idx) => {
+                        const wave = Math.sin(Date.now() * 0.012 + idx * 0.75) * 0.5 + 0.5;
+                        const jitter = Math.random() * 0.45;
+                        const pct = Math.min(100, Math.max(12, Math.round((wave * 0.65 + jitter) * 100)));
+                        bar.style.height = `${pct}%`;
+                        if (pct > 65) {
+                            bar.classList.add('active-glow');
+                        } else {
+                            bar.classList.remove('active-glow');
+                        }
+                    });
+
+                    secondsElapsed += 0.08;
+                    if (secondsElapsed >= totalSeconds) {
+                        syncTrackUI(currentTrackIdx + 1, true);
+                        return;
+                    }
+                    if (currentTimeEl) currentTimeEl.textContent = formatTime(secondsElapsed);
+                    if (progressFill) progressFill.style.width = `${(secondsElapsed / totalSeconds) * 100}%`;
+
+                    animFrameId = requestAnimationFrame(updateSpectrumVisualizer);
+                }
+
+                function startPlayback(updateUI = true) {
+                    if (isPlaying) return;
+                    isPlaying = true;
+                    if (updateUI) syncPlayStateUI(true);
+
+                    try {
+                        unlockAudioContext();
+                        if (audioCtx) {
+                            synthOsc = audioCtx.createOscillator();
+                            synthGain = audioCtx.createGain();
+                            synthOsc.type = 'triangle';
+                            synthOsc.frequency.setValueAtTime(TRACKS[currentTrackIdx].freq, audioCtx.currentTime);
+                            const volVal = volSlider ? parseFloat(volSlider.value) : 0.8;
+                            synthGain.gain.setValueAtTime(Math.max(0.001, volVal * 0.04), audioCtx.currentTime);
+                            synthOsc.connect(synthGain);
+                            synthGain.connect(audioCtx.destination);
+                            synthOsc.start();
+                        }
+                    } catch (err) {
+                        console.log('Synth playback fallback:', err);
+                    }
+
+                    cancelAnimationFrame(animFrameId);
+                    updateSpectrumVisualizer();
+                }
+
+                function stopPlayback(updateUI = true) {
+                    isPlaying = false;
+                    if (updateUI) syncPlayStateUI(false);
+                    cancelAnimationFrame(animFrameId);
+                    animFrameId = null;
+
+                    try {
+                        if (synthOsc) {
+                            synthOsc.stop();
+                            synthOsc.disconnect();
+                            synthOsc = null;
+                        }
+                        if (synthGain) {
+                            synthGain.disconnect();
+                            synthGain = null;
+                        }
+                    } catch (err) {
+                        synthOsc = null;
+                        synthGain = null;
+                    }
+
+                    visBars.forEach(bar => {
+                        bar.style.height = '12%';
+                        bar.classList.remove('active-glow');
+                    });
+                }
+
+                function togglePlayback() {
+                    if (isPlaying) {
+                        stopPlayback(true);
+                        return false;
+                    } else {
+                        startPlayback(true);
+                        return true;
+                    }
+                }
+
+                if (btnPlay) {
+                    btnPlay.addEventListener('click', () => {
+                        const playingNow = togglePlayback();
+                        showToast(playingNow ? `Reproduciendo: ${TRACKS[currentTrackIdx].title}` : 'Reproducción en pausa');
+                    });
+                }
+
+                if (volSlider) {
+                    volSlider.addEventListener('input', () => {
+                        if (synthGain && audioCtx) {
+                            synthGain.gain.setValueAtTime(
+                                Math.max(0.001, parseFloat(volSlider.value) * 0.04),
+                                audioCtx.currentTime
+                            );
+                        }
+                    });
+                }
+
+                if (progressBar) {
+                    progressBar.addEventListener('click', (e) => {
+                        const rect = progressBar.getBoundingClientRect();
+                        const clickRatio = Math.min(1, Math.max(0, (e.clientX - rect.left) / rect.width));
+                        secondsElapsed = clickRatio * totalSeconds;
+                        if (currentTimeEl) currentTimeEl.textContent = formatTime(secondsElapsed);
+                        if (progressFill) progressFill.style.width = `${clickRatio * 100}%`;
+                    });
+                }
+
+                if (btnPrev) {
+                    btnPrev.addEventListener('click', () => syncTrackUI(currentTrackIdx - 1, true));
+                }
+                if (btnNext) {
+                    btnNext.addEventListener('click', () => syncTrackUI(currentTrackIdx + 1, true));
+                }
+                if (iphoneBtnPrevTrack) {
+                    iphoneBtnPrevTrack.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (iphoneDragDist <= 8) syncTrackUI(currentTrackIdx - 1, true);
+                    });
+                }
+                if (iphoneBtnNextTrack) {
+                    iphoneBtnNextTrack.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (iphoneDragDist <= 8) syncTrackUI(currentTrackIdx + 1, true);
+                    });
+                }
+
+                document.querySelectorAll('#playlistBox .playlist-item').forEach((item) => {
+                    item.addEventListener('click', () => {
+                        const idx = parseInt(item.getAttribute('data-index'), 10);
+                        syncTrackUI(idx, false);
+                        if (!isPlaying) startPlayback(true);
+                        showToast(`${TRACKS[currentTrackIdx].title} — ${TRACKS[currentTrackIdx].artist}`);
+                    });
+                });
+
+                if (btnPlaylistToggle && playlistBox) {
+                    btnPlaylistToggle.addEventListener('click', () => {
+                        playlistBox.style.display = playlistBox.style.display === 'none' ? 'flex' : 'none';
+                    });
+                }
+
+                // ==========================================================
+                // 3D CUP VIEWER STATE & INITIALIZATION
+                // ==========================================================
+                const cup3dOverlay = document.getElementById('cup3dOverlay');
+                const cup3dCanvasWrap = document.getElementById('cup3dCanvasWrap');
+                const btnCloseCup3d = document.getElementById('btnCloseCup3d');
+
+                let cup3dInitialized = false;
+                let threeScene = null;
+                let threeCamera = null;
+                let threeRenderer = null;
+                let cupGroup = null;
+                let coffeeMesh = null;
+                let coffeeBasePositions = null;
+                let cup3dAnimId = null;
+                let cupAnimClock = 0;
+
+                let isDraggingCup = false;
+                let hasMovedCup = false;
+                let lastPointerX = 0;
+                let lastPointerY = 0;
+                let cupPointerDownX = 0;
+                let cupPointerDownY = 0;
+
+                let currentRotX = 0.18;
+                let currentRotY = 0.35;
+                let targetRotX = 0.18;
+                let targetRotY = 0.35;
+                let currentZoom = 6.2;
+                let targetZoom = 6.2;
+
+                const CUP_TEXTURE_URL = 'https://i.imgur.com/Qf2Xh7l.png';
+
+                function applyCanvasTexture(material, texture) {
+                    if (!material || !texture) return;
+                    texture.wrapS = THREE.RepeatWrapping;
+                    texture.wrapT = THREE.ClampToEdgeWrapping;
+                    if (THREE.sRGBEncoding) {
+                        texture.encoding = THREE.sRGBEncoding;
+                    }
+                    texture.needsUpdate = true;
+                    material.map = texture;
+                    material.color.setHex(0xffffff);
+                    material.needsUpdate = true;
+                }
+
+                function loadCupTextureWithFallback(material) {
+                    if (!material || typeof THREE === 'undefined') return;
+                    try {
+                        const loader = new THREE.TextureLoader();
+                        loader.setCrossOrigin('anonymous');
+                        loader.load(
+                            CUP_TEXTURE_URL,
+                            (tex) => applyCanvasTexture(material, tex),
+                            undefined,
+                            () => {
+                                const img = new Image();
+                                img.crossOrigin = 'anonymous';
+                                img.onload = () => {
+                                    const canvasTex = new THREE.Texture(img);
+                                    applyCanvasTexture(material, canvasTex);
+                                };
+                                img.src = CUP_TEXTURE_URL;
+                            }
+                        );
+                    } catch (e) {
+                        console.log('Cup texture load fallback error:', e);
+                    }
+                }
+
+                function initCup3DScene() {
+                    if (cup3dInitialized || typeof THREE === 'undefined' || !cup3dCanvasWrap) return;
+
+                    const width = cup3dCanvasWrap.clientWidth || BASE_WIDTH;
+                    const height = cup3dCanvasWrap.clientHeight || BASE_HEIGHT;
+
+                    threeScene = new THREE.Scene();
+                    threeCamera = new THREE.PerspectiveCamera(42, width / height, 0.1, 100);
+                    threeCamera.position.set(0, 0.35, currentZoom);
+
+                    threeRenderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+                    threeRenderer.setSize(width, height);
+                    threeRenderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+                    threeRenderer.setClearColor(0x000000, 0);
+                    if (THREE.sRGBEncoding) {
+                        threeRenderer.outputEncoding = THREE.sRGBEncoding;
+                    }
+
+                    cup3dCanvasWrap.appendChild(threeRenderer.domElement);
+
+                    const ambientLight = new THREE.AmbientLight(0xdbeafe, 1.05);
+                    threeScene.add(ambientLight);
+
+                    const keyLight = new THREE.DirectionalLight(0x7dd3fc, 1.35);
+                    keyLight.position.set(3.5, 5, 4.5);
+                    threeScene.add(keyLight);
+
+                    const rimLight = new THREE.PointLight(0x38bdf8, 1.4, 15);
+                    rimLight.position.set(-3.5, 2, -2.5);
+                    threeScene.add(rimLight);
+
+                    cupGroup = new THREE.Group();
+
+                    const outerMat = new THREE.MeshStandardMaterial({
+                        color: 0x0ea5e9,
+                        roughness: 0.35,
+                        metalness: 0.12
+                    });
+                    loadCupTextureWithFallback(outerMat);
+
+                    const trimMat = new THREE.MeshStandardMaterial({
+                        color: 0x38bdf8,
+                        emissive: 0x0284c7,
+                        emissiveIntensity: 0.35,
+                        roughness: 0.28,
+                        metalness: 0.25
+                    });
+
+                    const innerMat = new THREE.MeshStandardMaterial({
+                        color: 0x071936,
+                        roughness: 0.55,
+                        metalness: 0.08,
+                        side: THREE.BackSide
+                    });
+
+                    const cupRadius = 1.05;
+                    const cupHeight = 1.75;
+
+                    const outerWallGeo = new THREE.CylinderGeometry(cupRadius, cupRadius * 0.94, cupHeight, 64, 1, true);
+                    const outerWallMesh = new THREE.Mesh(outerWallGeo, outerMat);
+                    cupGroup.add(outerWallMesh);
+
+                    const innerWallGeo = new THREE.CylinderGeometry(cupRadius * 0.92, cupRadius * 0.87, cupHeight * 0.94, 48, 1, true);
+                    const innerWallMesh = new THREE.Mesh(innerWallGeo, innerMat);
+                    innerWallMesh.position.y = 0.04;
+                    cupGroup.add(innerWallMesh);
+
+                    const bottomGeo = new THREE.CylinderGeometry(cupRadius * 0.94, cupRadius * 0.94, 0.12, 48);
+                    const bottomMesh = new THREE.Mesh(bottomGeo, trimMat);
+                    bottomMesh.position.y = -cupHeight * 0.5 + 0.04;
+                    cupGroup.add(bottomMesh);
+
+                    const rimGeo = new THREE.TorusGeometry(cupRadius * 0.96, 0.055, 20, 64);
+                    rimGeo.rotateX(Math.PI / 2);
+                    const rimMesh = new THREE.Mesh(rimGeo, trimMat);
+                    rimMesh.position.y = cupHeight * 0.5;
+                    cupGroup.add(rimMesh);
+
+                    const handleGeo = new THREE.TorusGeometry(0.52, 0.11, 20, 48, Math.PI);
+                    handleGeo.rotateZ(-Math.PI / 2);
+                    const handleMesh = new THREE.Mesh(handleGeo, trimMat);
+                    handleMesh.position.set(cupRadius * 0.96, 0.02, 0);
+                    cupGroup.add(handleMesh);
+
+                    const coffeeGeo = new THREE.CircleGeometry(cupRadius * 0.9, 48);
+                    coffeeGeo.rotateX(-Math.PI / 2);
+                    const coffeeMat = new THREE.MeshStandardMaterial({
+                        color: 0x3b1808,
+                        emissive: 0x1a0802,
+                        emissiveIntensity: 0.35,
+                        roughness: 0.18,
+                        metalness: 0.25
+                    });
+                    coffeeMesh = new THREE.Mesh(coffeeGeo, coffeeMat);
+                    coffeeMesh.position.y = cupHeight * 0.26;
+                    coffeeBasePositions = new Float32Array(coffeeMesh.geometry.attributes.position.array);
+                    cupGroup.add(coffeeMesh);
+
+                    cupGroup.rotation.set(currentRotX, currentRotY, 0);
+                    threeScene.add(cupGroup);
+
+                    cup3dInitialized = true;
+                }
+
+                function renderCup3DFrame() {
+                    if (!cup3dOverlay || !cup3dOverlay.classList.contains('active')) {
+                        cup3dAnimId = null;
+                        return;
+                    }
+
+                    cupAnimClock += 0.045;
+
+                    if (coffeeMesh && coffeeBasePositions) {
+                        const posAttr = coffeeMesh.geometry.attributes.position;
+                        const arr = posAttr.array;
+                        for (let i = 0; i < arr.length; i += 3) {
+                            const bx = coffeeBasePositions[i];
+                            const bz = coffeeBasePositions[i + 2];
+                            const dist = Math.sqrt(bx * bx + bz * bz);
+                            const ripple =
+                                Math.sin(bx * 5.4 + cupAnimClock * 2.5) * 0.024 +
+                                Math.cos(bz * 5.4 - cupAnimClock * 2.1) * 0.024 +
+                                Math.sin(dist * 9.5 - cupAnimClock * 3.4) * 0.014;
+                            arr[i + 1] = coffeeBasePositions[i + 1] + ripple;
+                        }
+                        posAttr.needsUpdate = true;
+                        coffeeMesh.geometry.computeVertexNormals();
+                    }
+
+                    currentRotX += (targetRotX - currentRotX) * 0.14;
+                    currentRotY += (targetRotY - currentRotY) * 0.14;
+                    currentZoom += (targetZoom - currentZoom) * 0.14;
+
+                    if (cupGroup) {
+                        cupGroup.rotation.x = currentRotX;
+                        cupGroup.rotation.y = currentRotY;
+                    }
+
+                    if (threeCamera) {
+                        threeCamera.position.z = currentZoom;
+                    }
+
+                    if (threeRenderer && threeScene && threeCamera) {
+                        threeRenderer.render(threeScene, threeCamera);
+                    }
+
+                    cup3dAnimId = requestAnimationFrame(renderCup3DFrame);
+                }
+
+                function openCup3DViewer() {
+                    if (!cup3dOverlay) return;
+                    targetRotY = 0.35;
+                    targetRotX = 0.18;
+                    currentRotY = 0.35;
+                    currentRotX = 0.18;
+                    targetZoom = 6.2;
+                    currentZoom = 6.2;
+                    initCup3DScene();
+                    cup3dOverlay.classList.add('active');
+                    if (threeRenderer && cup3dCanvasWrap) {
+                        const w = cup3dCanvasWrap.clientWidth || BASE_WIDTH;
+                        const h = cup3dCanvasWrap.clientHeight || BASE_HEIGHT;
+                        threeRenderer.setSize(w, h);
+                        if (threeCamera) {
+                            threeCamera.aspect = w / h;
+                            threeCamera.updateProjectionMatrix();
+                        }
+                    }
+                    if (!cup3dAnimId) {
+                        renderCup3DFrame();
+                    }
+                }
+
+                function closeCup3DViewer() {
+                    if (!cup3dOverlay) return;
+                    isDraggingCup = false;
+                    cup3dOverlay.classList.remove('active', 'dragging');
+                    if (cup3dAnimId) {
+                        cancelAnimationFrame(cup3dAnimId);
+                        cup3dAnimId = null;
+                    }
+                }
+
+                if (widgets.cupWidget) {
+                    widgets.cupWidget.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openCup3DViewer();
+                    });
+                }
+
+                if (btnCloseCup3d) {
+                    btnCloseCup3d.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        closeCup3DViewer();
+                    });
+                }
+
+                if (cup3dOverlay) {
+                    cup3dOverlay.addEventListener('mousedown', (e) => {
+                        if (e.target && e.target.id === 'btnCloseCup3d') return;
+                        isDraggingCup = true;
+                        hasMovedCup = false;
+                        lastPointerX = e.clientX;
+                        lastPointerY = e.clientY;
+                        cupPointerDownX = e.clientX;
+                        cupPointerDownY = e.clientY;
+                        cup3dOverlay.classList.add('dragging');
+                    });
+
+                    document.addEventListener('mousemove', (e) => {
+                        if (!isDraggingCup) return;
+                        const dx = e.clientX - lastPointerX;
+                        const dy = e.clientY - lastPointerY;
+                        if (Math.hypot(e.clientX - cupPointerDownX, e.clientY - cupPointerDownY) > 5) {
+                            hasMovedCup = true;
+                        }
+                        lastPointerX = e.clientX;
+                        lastPointerY = e.clientY;
+
+                        targetRotY += dx * 0.012;
+                        targetRotX = Math.max(-1.1, Math.min(1.1, targetRotX + dy * 0.01));
+                    });
+
+                    document.addEventListener('mouseup', () => {
+                        if (!isDraggingCup) return;
+                        isDraggingCup = false;
+                        cup3dOverlay.classList.remove('dragging');
+                    });
+
+                    cup3dOverlay.addEventListener('touchstart', (e) => {
+                        if (e.target && e.target.id === 'btnCloseCup3d') return;
+                        if (e.touches.length > 0) {
+                            isDraggingCup = true;
+                            hasMovedCup = false;
+                            lastPointerX = e.touches[0].clientX;
+                            lastPointerY = e.touches[0].clientY;
+                            cupPointerDownX = e.touches[0].clientX;
+                            cupPointerDownY = e.touches[0].clientY;
+                        }
+                    }, { passive: true });
+
+                    cup3dOverlay.addEventListener('touchmove', (e) => {
+                        if (!isDraggingCup || e.touches.length === 0) return;
+                        const touch = e.touches[0];
+                        const dx = touch.clientX - lastPointerX;
+                        const dy = touch.clientY - lastPointerY;
+                        if (Math.hypot(touch.clientX - cupPointerDownX, touch.clientY - cupPointerDownY) > 8) {
+                            hasMovedCup = true;
+                        }
+                        lastPointerX = touch.clientX;
+                        lastPointerY = touch.clientY;
+
+                        targetRotY += dx * 0.012;
+                        targetRotX = Math.max(-1.1, Math.min(1.1, targetRotX + dy * 0.01));
+                    }, { passive: true });
+
+                    cup3dOverlay.addEventListener('wheel', (e) => {
+                        if (!cup3dOverlay.classList.contains('active')) return;
+                        e.preventDefault();
+                        targetZoom = Math.max(2.6, Math.min(11.0, targetZoom + e.deltaY * 0.004));
+                    }, { passive: false });
+
+                    cup3dOverlay.addEventListener('click', (e) => {
+                        if (e.target && e.target.id === 'btnCloseCup3d') return;
+                        const moveDist = Math.hypot(e.clientX - cupPointerDownX, e.clientY - cupPointerDownY);
+                        if (!hasMovedCup && moveDist <= 5) {
+                            closeCup3DViewer();
+                        }
+                    });
+
+                    cup3dOverlay.addEventListener('touchend', (e) => {
+                        if (e.target && e.target.id === 'btnCloseCup3d') return;
+                        const wasTap = !hasMovedCup;
+                        isDraggingCup = false;
+                        if (e.changedTouches && e.changedTouches.length > 0) {
+                            const touch = e.changedTouches[0];
+                            const moveDist = Math.hypot(touch.clientX - cupPointerDownX, touch.clientY - cupPointerDownY);
+                            if (wasTap && moveDist <= 8) {
+                                e.preventDefault();
+                                closeCup3DViewer();
+                            }
+                        }
+                    }, { passive: false });
+                }
+
+                // ==========================================================
+                // 3D IPHONE MODAL CONTROLLER & APPS
+                // ==========================================================
+                const iphone3dModalOverlay = document.getElementById('iphone3dModalOverlay');
+                const btnCloseIphone3d = document.getElementById('btnCloseIphone3d');
+                const iphoneScene3d = document.getElementById('iphoneScene3d');
+                const iphone3dObject = document.getElementById('iphone3dObject');
+                const iphoneModalScreen = document.getElementById('iphoneModalScreen');
+                const iphoneModalStatus = document.getElementById('iphoneModalStatus');
+                const iphoneUnlockBtn = document.getElementById('iphoneUnlockBtn');
+                const iphoneHomeBtn = document.getElementById('iphoneHomeBtn');
+                const iphoneAppViews = Array.from(document.querySelectorAll('#iphone3dModalOverlay .iphone-app-view'));
+                const iphoneAppButtons = Array.from(document.querySelectorAll('#iphone3dModalOverlay .iphone-app-icon[data-app]'));
+                const iphoneLiveTime = document.getElementById('iphoneLiveTime');
+                const iphoneLiveTimeShort = document.getElementById('iphoneLiveTimeShort');
+                const iphoneLiveDate = document.getElementById('iphoneLiveDate');
+                const iphoneMsgCancelBtn = document.getElementById('iphoneMsgCancelBtn');
+                const iphoneThemesBackBtn = document.getElementById('iphoneThemesBackBtn');
+                const iphoneThemesDoneBtn = document.getElementById('iphoneThemesDoneBtn');
+                const iphoneReplayMsgBtn = document.getElementById('iphoneReplayMsgBtn');
+                const iphoneMsgItems = Array.from(document.querySelectorAll('#iphoneMsgContainer .iphone-messages-conversation'));
+
+                let iphoneActiveAppId = null;
+                let iphoneMsgTimer = null;
+                let iphoneMsgIdx = 0;
+
+                let iphoneCurrentRotX = 0;
+                let iphoneCurrentRotY = 0;
+                let iphoneTargetRotX = 0;
+                let iphoneTargetRotY = 0;
+                let isIphoneDragging = false;
+                let iphoneStartX = 0;
+                let iphoneStartY = 0;
+                let iphoneStartRotX = 0;
+                let iphoneStartRotY = 0;
+                let iphoneDragDist = 0;
+
+                function applyIphoneTransform() {
+                    if (!iphone3dObject) return;
+                    iphone3dObject.style.transform = `rotateX(${iphoneCurrentRotX.toFixed(2)}deg) rotateY(${iphoneCurrentRotY.toFixed(2)}deg)`;
+                }
+
+                function updateIphoneClock() {
+                    const now = new Date();
+                    const hh = String(now.getHours()).padStart(2, '0');
+                    const mm = String(now.getMinutes()).padStart(2, '0');
+                    const timeStr = `${hh}:${mm}`;
+
+                    if (iphoneLiveTime) iphoneLiveTime.textContent = timeStr;
+                    if (iphoneLiveTimeShort) iphoneLiveTimeShort.textContent = timeStr;
+
+                    if (iphoneLiveDate) {
+                        const locale = navigator.language || 'es-ES';
+                        let formatted = now.toLocaleDateString(locale, { weekday: 'long', month: 'long', day: 'numeric' });
+                        iphoneLiveDate.textContent = formatted.charAt(0).toUpperCase() + formatted.slice(1);
+                    }
+                }
+
+                setInterval(updateIphoneClock, 1000);
+                updateIphoneClock();
+
+                function closeIphoneApps() {
+                    iphoneActiveAppId = null;
+                    if (iphoneMsgTimer) {
+                        clearInterval(iphoneMsgTimer);
+                        iphoneMsgTimer = null;
+                    }
+                    iphoneAppViews.forEach((v) => v.classList.remove('is-open'));
+                    if (iphoneModalStatus) iphoneModalStatus.classList.remove('dark-text');
+                    if (iphoneHomeBtn) iphoneHomeBtn.classList.remove('dark');
+                }
+
+                function unlockIphoneScreen() {
+                    if (iphoneDragDist > 8) return;
+                    if (iphoneModalScreen) iphoneModalScreen.classList.add('is-unlocked');
+                }
+
+                function lockIphoneScreen() {
+                    if (iphoneDragDist > 8) return;
+                    closeIphoneApps();
+                    if (iphoneModalScreen) iphoneModalScreen.classList.remove('is-unlocked');
+                }
+
+                function handleHomeBarDismiss() {
+                    if (iphoneActiveAppId) {
+                        closeIphoneApps();
+                    } else {
+                        lockIphoneScreen();
+                    }
+                }
+
+                function showNextIphoneMessage() {
+                    if (iphoneMsgIdx < iphoneMsgItems.length) {
+                        const item = iphoneMsgItems[iphoneMsgIdx];
+                        item.classList.remove('is-hidden');
+                        void item.offsetWidth;
+                        item.classList.add('msg-animate');
+                        playMessageNotificationSound();
+
+                        const listEl = document.getElementById('iphoneMsgContainer');
+                        if (listEl) listEl.scrollTop = listEl.scrollHeight;
+                        iphoneMsgIdx++;
+                    }
+                }
+
+                function startIphoneMessageSequence() {
+                    if (iphoneMsgTimer) {
+                        clearInterval(iphoneMsgTimer);
+                        iphoneMsgTimer = null;
+                    }
+                    iphoneMsgIdx = 0;
+                    iphoneMsgItems.forEach((item) => {
+                        item.classList.add('is-hidden');
+                        item.classList.remove('msg-animate');
+                    });
+
+                    showNextIphoneMessage();
+                    iphoneMsgTimer = setInterval(() => {
+                        if (iphoneMsgIdx < iphoneMsgItems.length) {
+                            showNextIphoneMessage();
+                        } else {
+                            clearInterval(iphoneMsgTimer);
+                            iphoneMsgTimer = null;
+                        }
+                    }, 3000);
+                }
+
+                function openIphoneApp(appId) {
+                    if (iphoneDragDist > 8) return;
+                    unlockIphoneScreen();
+                    iphoneActiveAppId = appId;
+
+                    iphoneAppViews.forEach((view) => {
+                        view.classList.toggle('is-open', view.id === appId);
+                    });
+
+                    if (appId === 'iphone-app-messages') {
+                        if (iphoneModalStatus) iphoneModalStatus.classList.add('dark-text');
+                        if (iphoneHomeBtn) iphoneHomeBtn.classList.add('dark');
+                        startIphoneMessageSequence();
+                    } else {
+                        if (iphoneModalStatus) iphoneModalStatus.classList.remove('dark-text');
+                        if (iphoneHomeBtn) iphoneHomeBtn.classList.remove('dark');
+                    }
+                }
+
+                function openIphone3DModal() {
+                    if (!iphone3dModalOverlay) return;
+                    iphoneCurrentRotX = 0;
+                    iphoneCurrentRotY = 0;
+                    iphoneTargetRotX = 0;
+                    iphoneTargetRotY = 0;
+                    iphoneDragDist = 0;
+                    applyIphoneTransform();
+                    updateIphoneClock();
+                    iphone3dModalOverlay.classList.add('is-visible');
+                    iphone3dModalOverlay.setAttribute('aria-hidden', 'false');
+                }
+
+                function closeIphone3DModal() {
+                    if (!iphone3dModalOverlay) return;
+                    isIphoneDragging = false;
+                    closeIphoneApps();
+                    if (iphoneModalScreen) iphoneModalScreen.classList.remove('is-unlocked');
+                    iphone3dModalOverlay.classList.remove('is-visible');
+                    iphone3dModalOverlay.setAttribute('aria-hidden', 'true');
+                }
+
+                if (widgets.phoneWidget) {
+                    widgets.phoneWidget.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        openIphone3DModal();
+                    });
+                }
+
+                if (btnCloseIphone3d) {
+                    btnCloseIphone3d.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        closeIphone3DModal();
+                    });
+                }
+
+                if (iphone3dModalOverlay) {
+                    iphone3dModalOverlay.addEventListener('click', (e) => {
+                        if (e.target === iphone3dModalOverlay) {
+                            closeIphone3DModal();
+                        }
+                    });
+                }
+
+                if (iphoneScene3d) {
+                    iphoneScene3d.addEventListener('pointerdown', (e) => {
+                        if (e.target && e.target.closest('#iphoneHomeBtn')) return;
+                        isIphoneDragging = true;
+                        iphoneStartX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+                        iphoneStartY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+                        iphoneStartRotX = iphoneTargetRotX;
+                        iphoneStartRotY = iphoneTargetRotY;
+                        iphoneDragDist = 0;
+                    });
+                }
+
+                window.addEventListener('pointermove', (e) => {
+                    if (!isIphoneDragging) return;
+                    const currX = e.clientX || (e.touches && e.touches[0].clientX) || 0;
+                    const currY = e.clientY || (e.touches && e.touches[0].clientY) || 0;
+                    const dx = currX - iphoneStartX;
+                    const dy = currY - iphoneStartY;
+                    iphoneDragDist = Math.hypot(dx, dy);
+
+                    iphoneTargetRotY = iphoneStartRotY + dx * 0.55;
+                    iphoneTargetRotX = Math.max(-75, Math.min(75, iphoneStartRotX - dy * 0.45));
+                    iphoneCurrentRotX = iphoneTargetRotX;
+                    iphoneCurrentRotY = iphoneTargetRotY;
+                    applyIphoneTransform();
+                });
+
+                window.addEventListener('pointerup', () => {
+                    isIphoneDragging = false;
+                });
+
+                if (iphoneUnlockBtn) {
+                    iphoneUnlockBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        unlockIphoneScreen();
+                    });
+                }
+
+                // Expanded home bar tap + swipe-up gesture to close apps or lock
+                if (iphoneHomeBtn) {
+                    let homeDownY = 0;
+                    let homeSwipedUp = false;
+
+                    iphoneHomeBtn.addEventListener('pointerdown', (e) => {
+                        e.stopPropagation();
+                        homeDownY = e.clientY;
+                        homeSwipedUp = false;
+                    });
+
+                    iphoneHomeBtn.addEventListener('pointermove', (e) => {
+                        e.stopPropagation();
+                        if (homeDownY - e.clientY >= 16 && !homeSwipedUp) {
+                            homeSwipedUp = true;
+                            handleHomeBarDismiss();
+                        }
+                    });
+
+                    iphoneHomeBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (homeSwipedUp) {
+                            homeSwipedUp = false;
+                            return;
+                        }
+                        handleHomeBarDismiss();
+                    });
+                }
+
+                iphoneAppButtons.forEach((btn) => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const targetApp = btn.getAttribute('data-app');
+                        if (targetApp) openIphoneApp(targetApp);
+                    });
+                });
+
+                if (iphoneMsgCancelBtn) iphoneMsgCancelBtn.addEventListener('click', closeIphoneApps);
+                if (iphoneThemesBackBtn) iphoneThemesBackBtn.addEventListener('click', closeIphoneApps);
+                if (iphoneThemesDoneBtn) iphoneThemesDoneBtn.addEventListener('click', closeIphoneApps);
+
+                if (iphoneReplayMsgBtn) {
+                    iphoneReplayMsgBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (iphoneDragDist <= 8) startIphoneMessageSequence();
+                    });
+                }
+
+                document.querySelectorAll('#iphone3dModalOverlay .iphone-like-btn').forEach((btn) => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (iphoneDragDist <= 8) btn.classList.toggle('liked');
+                    });
+                });
+
+                if (iphonePlayPauseBtn) {
+                    iphonePlayPauseBtn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        if (iphoneDragDist > 8) return;
+                        const playingNow = togglePlayback();
+                        showToast(playingNow ? `Reproduciendo: ${TRACKS[currentTrackIdx].title}` : 'Reproducción en pausa');
+                    });
+                }
+
+                // ==========================================================
+                // VOID RED THEME, GLOBAL COLOR THEMES & CHIBI INTERACTIONS
+                // ==========================================================
+                const COLOR_THEMES = {
+                    'void-blue': {
+                        label: 'Azul Mugen',
+                        primary: '#00aaff',
+                        secondary: '#0284c7',
+                        soft: '#7dd3fc',
+                        hue: '0deg',
+                        voidRed: false,
+                        custom: false
+                    },
+                    'crimson-aka': {
+                        label: 'Rojo Aka',
+                        primary: '#ff1e42',
+                        secondary: '#99001e',
+                        soft: '#ff6b81',
+                        hue: '155deg',
+                        voidRed: true,
+                        custom: false
+                    },
+                    'purple-hollow': {
+                        label: 'Morado Murasaki',
+                        primary: '#a855f7',
+                        secondary: '#581c87',
+                        soft: '#d8b4fe',
+                        hue: '45deg',
+                        voidRed: false,
+                        custom: true
+                    },
+                    'emerald-cursed': {
+                        label: 'Esmeralda',
+                        primary: '#10b981',
+                        secondary: '#065f46',
+                        soft: '#6ee7b7',
+                        hue: '-65deg',
+                        voidRed: false,
+                        custom: true
+                    },
+                    'amber-gold': {
+                        label: 'Ámbar Six',
+                        primary: '#f59e0b',
+                        secondary: '#92400e',
+                        soft: '#fcd34d',
+                        hue: '-155deg',
+                        voidRed: false,
+                        custom: true
+                    },
+                    'rose-sakura': {
+                        label: 'Rosa Neón',
+                        primary: '#ec4899',
+                        secondary: '#9d174d',
+                        soft: '#f9a8d4',
+                        hue: '115deg',
+                        voidRed: false,
+                        custom: true
+                    }
+                };
+
+                const THEME_STORAGE_KEY = 'gojo_selected_theme';
+                const themeSwatchBtns = Array.from(document.querySelectorAll('#iphoneThemeSwatches .theme-swatch-btn'));
+                const iphoneActiveThemeName = document.getElementById('iphoneActiveThemeName');
+
+                function applyGlobalColorTheme(themeKey, notify = true) {
+                    if (COLOR_THEMES[themeKey]) {
+                        try {
+                            localStorage.setItem(THEME_STORAGE_KEY, themeKey);
+                        } catch (e) {}
+                    }
+                    const theme = COLOR_THEMES[themeKey] || COLOR_THEMES['void-blue'];
+
+                    document.body.classList.toggle('void-red-active', Boolean(theme.voidRed));
+                    document.body.classList.toggle('custom-accent-active', Boolean(theme.custom));
+
+                    if (theme.custom) {
+                        document.body.style.setProperty('--accent-primary', theme.primary);
+                        document.body.style.setProperty('--accent-secondary', theme.secondary);
+                        document.body.style.setProperty('--accent-soft', theme.soft);
+                        document.body.style.setProperty('--accent-hue', theme.hue);
+                    } else {
+                        document.body.style.removeProperty('--accent-primary');
+                        document.body.style.removeProperty('--accent-secondary');
+                        document.body.style.removeProperty('--accent-soft');
+                        document.body.style.removeProperty('--accent-hue');
+                    }
+
+                    themeSwatchBtns.forEach((btn) => {
+                        btn.classList.toggle('is-selected', btn.getAttribute('data-theme') === themeKey);
+                    });
+
+                    if (iphoneActiveThemeName) {
+                        iphoneActiveThemeName.textContent = theme.label;
+                    }
+
+                    if (bgStatus) {
+                        bgStatus.textContent = `Fondo: Gojo Desktop • Tema ${theme.label}`;
+                    }
+
+                    if (notify) {
+                        showToast(`Tema aplicado: ${theme.label}`);
+                    }
+                }
+
+                themeSwatchBtns.forEach((btn) => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const chosenTheme = btn.getAttribute('data-theme');
+                        applyGlobalColorTheme(chosenTheme, true);
+                    });
+                });
+
+                const chibiQuote = document.getElementById('chibiQuote');
+                const chibiMoodBadge = document.getElementById('chibiMoodBadge');
+                const chibiStates = [
+                    { moodClass: 'mood-happy', badge: '✨', quote: 'Feliz • "¡Saikyou!"' },
+                    { moodClass: 'mood-love', badge: '💙', quote: 'Six Eyes • "Mugen"' },
+                    { moodClass: 'mood-angry', badge: '🔥', quote: 'Aka • "¡Shukushou!"' }
+                ];
+                const chibiSprites = [
+                    { src: CHIBI_DEFAULT_SRC, variant: '' },
+                    { src: CHIBI_BLUE_SRC, variant: 'variant-blue' },
+                    { src: CHIBI_RED_SRC, variant: 'variant-red' }
+                ];
+                let chibiStateIdx = 0;
+
+                if (widgets.chibiWidget) {
+                    widgets.chibiWidget.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        chibiStateIdx = (chibiStateIdx + 1) % chibiStates.length;
+                        chibiVariantIdx = (chibiVariantIdx + 1) % chibiSprites.length;
+
+                        const state = chibiStates[chibiStateIdx];
+                        const sprite = chibiSprites[chibiVariantIdx];
+
+                        widgets.chibiWidget.classList.remove('mood-happy', 'mood-love', 'mood-angry');
+                        widgets.chibiWidget.classList.add(state.moodClass);
+
+                        if (chibiMoodBadge) chibiMoodBadge.textContent = state.badge;
+                        if (chibiQuote) chibiQuote.textContent = state.quote;
+
+                        if (chibiSpriteImg) {
+                            chibiSpriteImg.classList.remove('variant-blue', 'variant-red', 'swap-anim');
+                            if (sprite.variant) chibiSpriteImg.classList.add(sprite.variant);
+                            chibiSpriteImg.src = sprite.src;
+                            void chibiSpriteImg.offsetWidth;
+                            chibiSpriteImg.classList.add('swap-anim');
+                        }
+                    });
+                }
+
+                const savedThemeKey = (() => {
+                    try {
+                        return localStorage.getItem(THEME_STORAGE_KEY);
+                    } catch (e) {
+                        return null;
+                    }
+                })();
+                if (savedThemeKey && COLOR_THEMES[savedThemeKey]) {
+                    applyGlobalColorTheme(savedThemeKey, false);
+                }
+
+                document.addEventListener('keydown', (e) => {
+                    if (e.key === 'Escape') {
+                        if (iphone3dModalOverlay && iphone3dModalOverlay.classList.contains('is-visible')) {
+                            closeIphone3DModal();
+                        } else if (cup3dOverlay && cup3dOverlay.classList.contains('active')) {
+                            closeCup3DViewer();
+                        } else if (calibPanel && calibPanel.classList.contains('active')) {
+                            calibPanel.classList.remove('active');
+                            Object.keys(widgets).forEach(k => widgets[k] && widgets[k].classList.remove('widget-selected'));
+                        }
+                    }
+                });
+
+                syncTrackUI(0, false);
+
+            } catch (err) {
+                console.error("Gojo Player initialization safeguard:", err);
+            }
+        });
+    </script>
+</body>
+</html>
